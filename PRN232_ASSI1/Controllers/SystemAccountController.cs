@@ -18,7 +18,7 @@ namespace PRN232_ASSI1.Controllers
             _systemAccountServices = systemAccountServices;
         }
 
-        [HttpGet("login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(string email, string password)
         {
             var response = await _systemAccountServices.Login(email, password);

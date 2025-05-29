@@ -24,6 +24,25 @@ namespace DLL.Services
         
         public async Task<ResponseDto> Login(string email, string password)
         {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return new ResponseDto(
+                    statusCode: 400,
+                    message: "Email or password cannot be empty",
+                    isSuccess: false,
+                    result: null
+                );
+            }
+            string mailValidate = @"^[a-zA-Z0-9._%+-]+@FUNewsManagement\.org$";
+            if (!Regex.IsMatch(email, mailValidate))
+            {
+                return new ResponseDto(
+                    statusCode: 400,
+                    message: "Email must be FUNewsManagement",
+                    isSuccess: false,
+                    result: null
+                );
+            }
             var account = _context.SystemAccounts.FirstOrDefault(a => a.AccountEmail == email && a.AccountPassword == password);
             if (account == null)
             {
@@ -34,25 +53,7 @@ namespace DLL.Services
                     result: null
                 );
             }
-            if (string.IsNullOrEmpty(account.AccountEmail) || string.IsNullOrEmpty(account.AccountPassword))
-            {
-                return new ResponseDto(
-                    statusCode: 400,
-                    message: "Email or password cannot be empty",
-                    isSuccess: false,
-                    result: null
-                );
-            }
-            string mailValidate = @"^[a-zA-Z0-9._%+-]+@FUNewsManagement\.org$";
-            if (!Regex.IsMatch(account.AccountEmail, mailValidate))
-            {
-                return new ResponseDto(
-                    statusCode: 400,
-                    message: "Email must be FUNewsManagement",
-                    isSuccess: false,
-                    result: null
-                );
-            }
+      
             var accountDto = new SystemAccountDto
             {
                 AccountId = account.AccountId,
