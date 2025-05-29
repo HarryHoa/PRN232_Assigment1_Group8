@@ -31,7 +31,6 @@ namespace PRNN232_Assigment1_FE.Controllers
 
             try
             {
-                // ✅ Sử dụng POST request với JSON body
                 var loginData = new
                 {
                     email = model.Email,
@@ -43,42 +42,33 @@ namespace PRNN232_Assigment1_FE.Controllers
 
                 var response = await _httpClient.PostAsync("SystemAccount/login", content);
 
-                if (response.IsSuccessStatusCode)
+                if (response != null && response.IsSuccessStatusCode)
                 {
-                    // API trả về success thì đăng nhập thành công
-                    HttpContext.Session.SetString("IsLoggedIn", "true");
-                    HttpContext.Session.SetString("UserEmail", model.Email);
-                    TempData["SuccessMessage"] = "Đăng nhập thành công!";
                     return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    var errorMessage = response.StatusCode switch
-                    {
-                        System.Net.HttpStatusCode.Unauthorized => "Email hoặc mật khẩu không đúng!",
-                        System.Net.HttpStatusCode.BadRequest => "Dữ liệu không hợp lệ!",
-                        _ => "Đăng nhập thất bại!"
-                    };
+                    TempData["Message"] = "Mật khẩu hoặc Mail kh đúng hãy thử lại ";
 
-                    ModelState.AddModelError("", errorMessage);
                     return View(model);
                 }
             }
-            catch (HttpRequestException ex)
-            {
-                ModelState.AddModelError("", $"Lỗi kết nối server: {ex.Message}");
-                return View(model);
-            }
-            catch (TaskCanceledException ex)
-            {
-                ModelState.AddModelError("", "Timeout khi kết nối server!");
-                return View(model);
-            }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Lỗi không xác định: {ex.Message}");
+                TempData["Message"] = "Login fail, please check your account";
+
                 return View(model);
             }
+
         }
+           
+    }
+
+    public class ResponseDto
+    {
+        public int StatusCode { get; set; }
+        public string Message { get; set; }
+        public bool IsSuccess { get; set; }
+        public object Result { get; set; }
     }
 }

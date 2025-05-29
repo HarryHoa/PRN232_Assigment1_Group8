@@ -15,12 +15,12 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        if (HttpContext.Session.GetString("IsLoggedIn") != "true")
-        {
-            return RedirectToAction("Login", "Account");
-        }
+        //if (HttpContext.Session.GetString("IsLoggedIn") != "true")
+        //{
+        //    return RedirectToAction("Login", "Account");
+        //}
 
-        ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
+        //ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
         return View();
     }
 

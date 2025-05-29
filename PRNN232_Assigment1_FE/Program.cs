@@ -10,12 +10,12 @@ namespace PRNN232_Assigment1_FE
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
+            //builder.Services.AddSession(options =>
+            //{
+            //    options.IdleTimeout = TimeSpan.FromMinutes(30);
+            //    options.Cookie.HttpOnly = true;
+            //    options.Cookie.IsEssential = true;
+            //});
 
             // Fix for CS1929: Use IHttpClientBuilder returned by AddHttpClient() to configure the primary HTTP message handler.
 
@@ -38,7 +38,7 @@ namespace PRNN232_Assigment1_FE
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseSession(); // Add this line before app.UseAuthorization();
+            //app.UseSession(); // Add this line before app.UseAuthorization();
             app.UseAuthorization();
 
             app.MapControllerRoute(

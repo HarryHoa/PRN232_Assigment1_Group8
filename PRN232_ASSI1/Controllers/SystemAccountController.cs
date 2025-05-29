@@ -19,9 +19,9 @@ namespace PRN232_ASSI1.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var response = await _systemAccountServices.Login(email, password);
+            var response = await _systemAccountServices.Login(loginDto.Email, loginDto.Password);
             if (response.IsSuccess)
             {
                 return Ok(response);
