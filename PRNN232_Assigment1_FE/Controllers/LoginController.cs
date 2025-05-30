@@ -48,14 +48,14 @@ namespace PRNN232_Assigment1_FE.Controllers
                 }
                 else
                 {
-                    TempData["Message"] = "Mật khẩu hoặc Mail kh đúng hãy thử lại ";
+                    TempData["ErrorMessage"] = "Mật khẩu hoặc Mail kh đúng hãy thử lại ";
 
                     return View(model);
                 }
             }
             catch (Exception ex)
             {
-                TempData["Message"] = "Login fail, please check your account";
+                TempData["ErrorMessage"] = "Login fail, please check your account";
 
                 return View(model);
             }
