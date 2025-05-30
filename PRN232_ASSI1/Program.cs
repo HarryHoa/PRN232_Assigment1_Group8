@@ -22,8 +22,9 @@ namespace PRN232_ASSI1
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             //builder.Services.AddScoped<SystemAccountService>();
-    
+
 
             builder.Services.AddControllers()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SystemAccountDtoValidator>());
