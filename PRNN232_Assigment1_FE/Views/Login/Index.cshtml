@@ -3,16 +3,14 @@
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Đăng nhập</h3>
+                    <h3 class="text-center">Login</h3>
                 </div>
                 <div class="card-body">
-
                     @* Hiển thị lỗi từ TempData *@
                     @if (TempData["ErrorMessage"] != null)
                     {
@@ -20,7 +18,6 @@
                             @TempData["ErrorMessage"]
                         </div>
                     }
-
                     @* Hiển thị lỗi từ ModelState *@
                     @if (ViewData.ModelState.ErrorCount > 0)
                     {
@@ -28,24 +25,27 @@
                             @Html.ValidationSummary(false, "", new { @class = "text-danger" })
                         </div>
                     }
-
                     <form asp-action="Index" method="post">
                         <div class="form-group mb-3">
                             <label asp-for="Email" class="form-label">Email:</label>
-                            <input asp-for="Email" class="form-control" placeholder="Nhập email của bạn" />
+                            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
-
                         <div class="form-group mb-3">
-                            <label asp-for="Password" class="form-label">Mật khẩu:</label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                            <label asp-for="Password" class="form-label">Password:</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" />
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary">Login</button>
                         </div>
                     </form>
+
+                    @* Register button section *@
+                    <div class="text-center">
+                        <p class="mb-2">Don't have an account?</p>
+                        <a href="@Url.Action("Index", "Register")" class="btn btn-outline-secondary">Sign Up</a>
+                    </div>
                 </div>
             </div>
         </div>
