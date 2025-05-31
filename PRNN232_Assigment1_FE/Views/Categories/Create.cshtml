@@ -1,4 +1,4 @@
-﻿@model Common.Dto.CategoryDto.CategoryResponseDto
+﻿@* @model Common.Dto.CategoryDto.CategoryResponseDto
 
 
 @{
@@ -27,11 +27,7 @@
                 <label asp-for="ParentCategoryId" class="control-label"></label>
                 <select asp-for="ParentCategoryId" class ="form-control" asp-items="ViewBag.ParentCategoryId"></select>
             </div>
-         @*    <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <input asp-for="IsActive" class="form-control" />
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div> *@
+        
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -45,4 +41,72 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ *@
+ @model Common.Dto.CategoryDto.CategoryResponseDto
+
+@{
+    ViewData["Title"] = "Create Category";
+}
+
+<h1 class="mb-4 text-primary">Create Category</h1>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error:</strong> @ViewBag.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm p-4 bg-light">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryName" class="form-label fw-bold"></label>
+            <input asp-for="CategoryName" class="form-control" />
+            <span asp-validation-for="CategoryName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryDesciption" class="form-label fw-bold"></label>
+            <input asp-for="CategoryDesciption" class="form-control" />
+            <span asp-validation-for="CategoryDesciption" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ParentCategoryId" class="form-label fw-bold"></label>
+            <select asp-for="ParentCategoryId" class="form-select" asp-items="ViewBag.ParentCategoryId">
+                <option value="">-- Select Parent Category --</option>
+            </select>
+            <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
+        </div>
+
+        @* Uncomment if you want to enable IsActive field
+        <div class="mb-3">
+        <label asp-for="IsActive" class="form-label fw-bold"></label>
+        <select asp-for="IsActive" class="form-select">
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+        </select>
+        <span asp-validation-for="IsActive" class="text-danger"></span>
+        </div>
+        *@
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Create
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Back to List
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

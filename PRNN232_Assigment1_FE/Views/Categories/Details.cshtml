@@ -1,4 +1,4 @@
-﻿@model Common.Dto.CategoryDto.CategoryResponseDto
+﻿@* @model Common.Dto.CategoryDto.CategoryResponseDto
 
 
 @{
@@ -41,4 +41,61 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.CategoryId">Edit</a> |
     <a asp-action="Index">Back to List</a>
+</div>
+ *@
+ @model Common.Dto.CategoryDto.CategoryResponseDto
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1 class="mb-4">Details</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Details of category</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.CategoryName)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.CategoryName)
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.CategoryDesciption)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.CategoryDesciption)
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.IsActive)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.IsActive ==true)
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Inactive</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.ParentCategoryName)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.ParentCategoryName)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a asp-action="Edit" asp-route-id="@Model?.CategoryId" class="btn btn-warning me-2">Chỉnh sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 </div>

@@ -1,4 +1,4 @@
-﻿@model DAL.Models.Category
+﻿@* @model Common.Dto.CategoryDto.CategoryResponseDto
 
 @{
     ViewData["Title"] = "Delete";
@@ -30,10 +30,10 @@
             @Html.DisplayFor(model => model.IsActive)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ParentCategory)
+            @Html.DisplayNameFor(model => model.ParentCategoryName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ParentCategory.CategoryDesciption)
+            @Html.DisplayFor(model => model.ParentCategoryName)
         </dd>
     </dl>
     
@@ -43,3 +43,51 @@
         <a asp-action="Index">Back to List</a>
     </form>
 </div>
+ *@
+ @model Common.Dto.CategoryDto.CategoryResponseDto
+
+@{
+    ViewData["Title"] = "Delete Category";
+}
+
+<h1 class="text-danger">Delete Category</h1>
+
+<h4 class="text-muted">Are you sure you want to delete this category?</h4>
+<hr />
+
+@if (ViewBag.DeleteError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error:</strong> @ViewBag.DeleteError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm p-4 mb-4 bg-light">
+    <dl class="row">
+        <dt class="col-sm-3">Category Name</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CategoryName)</dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CategoryDesciption)</dd>
+
+        <dt class="col-sm-3">Is Active</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.IsActive)</dd>
+
+        <dt class="col-sm-3">Parent Category</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ParentCategoryName)</dd>
+    </dl>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash-fill"></i> Delete
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Back to List
+        </a>
+    </div>
+</form>
