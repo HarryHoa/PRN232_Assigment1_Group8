@@ -8,7 +8,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<NewsArticle, NewArticleRes>()
+        CreateMap<NewsArticle, ListNewArticleRes>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
     }
 }

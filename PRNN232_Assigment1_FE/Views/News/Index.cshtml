@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Post Statistics";
+}
+
+<div class="container p-4">
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <h1 class="display-4">📊 Post Statistics</h1>
+                <p class="lead text-muted">Track and analyze posts over time</p>
+            </div>
+
+            <div class="bg-white rounded p-4 mb-4 border shadow-sm">
+                <form method="get" action="/News" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">From date:</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate"
+                            value="@ViewBag.StartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">To date:</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" value="@ViewBag.EndDate">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Update Statistics</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.TotalPosts</h3>
+                            <p class="text-muted mb-0">TOTAL POSTS</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.AveragePerDay</h3>
+                            <p class="text-muted mb-0">AVERAGE/DAY</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.PostsMonth</h3>
+                            <p class="text-muted mb-0">POSTS THIS MONTH</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.PostsToday</h3>
+                            <p class="text-muted mb-0">POSTS TODAY</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set minimum date for end date based on start date
+        document.getElementById('startDate').addEventListener('change', function () {
+            document.getElementById('endDate').min = this.value;
+        });
+
+        // Set maximum date for start date based on end date
+        document.getElementById('endDate').addEventListener('change', function () {
+            document.getElementById('startDate').max = this.value;
+        });
+    </script>
+}
