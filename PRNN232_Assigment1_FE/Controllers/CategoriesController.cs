@@ -40,11 +40,11 @@ namespace PRNN232_Assigment1_FE.Controllers
             var response = await _httpClient.GetAsync(apiUrl);
             //var response = await _httpClient.GetAsync("/api/Category"); // Gọi endpoint API lấy danh sách
             Console.WriteLine($"Calling API URL: {apiUrl}");
-            var jsonData2 = await response.Content.ReadAsStringAsync();
-            var categories2 = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData2,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            //var jsonData2 = await response.Content.ReadAsStringAsync();
+            //var categories2 = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData2,
+            //    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Console.WriteLine($"Categories count after search: {categories2?.Count ?? 0}");
+            //Console.WriteLine($"Categories count after search: {categories2?.Count ?? 0}");
 
 
 
