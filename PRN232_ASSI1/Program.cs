@@ -2,6 +2,7 @@
 using Common.Validator;
 using DAL.Models;
 using DLL.Interface;
+using DLL.Mapping;
 using DLL.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -23,14 +24,13 @@ namespace PRN232_ASSI1
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
             //builder.Services.AddScoped<SystemAccountService>();
-    
+            builder.Services.AddScoped<INewsArticleService, NewsArticleService>();
 
             builder.Services.AddControllers()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SystemAccountDtoValidator>());
 
-
+            builder.Services.AddAutoMapper(typeof(NewsArticleMappingProfile));
             // Updated to use the recommended method for registering validators
-
 
             builder.Services.AddDbContext<FUNewsManagementContext>(options =>
   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
