@@ -120,5 +120,28 @@ namespace DLL.Services
                  })
                         .ToListAsync();
         }
+        // hàm lấy danh sách artical của 1 category
+        public async Task<List<NewsArticle>> GetArticlesByCategoryIdAsync(short categoryId)
+        {
+            return await _context.NewsArticles
+                .Where(a => a.CategoryId == categoryId)
+                .ToListAsync();
+        }
+        // hàm lấy những danh mục con của 1 parent category
+        public async Task<List<CategoryResponseDto>> GetSubCategoriesAsync(short parentId)
+        {
+            return await _context.Categories
+                .Where(c => c.ParentCategoryId == parentId)
+                .Select(c => new CategoryResponseDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    CategoryDesciption = c.CategoryDesciption,
+                    IsActive = c.IsActive,
+                    ParentCategoryId = c.ParentCategoryId
+                })
+                .ToListAsync();
+        }
+
     }
 }

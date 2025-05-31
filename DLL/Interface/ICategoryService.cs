@@ -17,5 +17,7 @@ namespace DLL.Interface
         Task UpdateAsync(short id,CategoryUpdateDto category);
         Task DeleteAsync(short id);
         Task<List<CategoryResponseDto>> SearchAsync(string keyword);
+        Task<List<NewsArticle>> GetArticlesByCategoryIdAsync(short categoryId);
+        Task<List<CategoryResponseDto>> GetSubCategoriesAsync(short parentId);
     }
 }

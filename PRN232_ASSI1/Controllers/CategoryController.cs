@@ -70,7 +70,23 @@ namespace PRN232_ASSI1.Controllers
             var results = await _service.SearchAsync(keyword);
             return Ok(results);
         }
+        [HttpGet("{categoryId}/articles")]
+        public async Task<IActionResult> GetArticlesByCategoryId(short categoryId)
+        {
+            var articles = await _service.GetArticlesByCategoryIdAsync(categoryId);
+            if (articles == null || !articles.Any())
+                return NotFound("No articles found for this category");
+            return Ok(articles);
+        }
+        [HttpGet("categories/{parentId}/subcategories")]
+        public async Task<IActionResult> GetSubCategories(short parentId)
+        {
+            var result = await _service.GetSubCategoriesAsync(parentId);
+            return Ok(result);
+        }
+
+
     }
 
-    
+
 }
