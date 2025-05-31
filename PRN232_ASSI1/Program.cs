@@ -1,6 +1,9 @@
 
 using Common.Validator;
 using DAL.Models;
+using DAL.Repository;
+using DAL.Repository.Impl;
+using DLL;
 using DLL.Interface;
 using DLL.Services;
 using FluentValidation;
@@ -22,6 +25,10 @@ namespace PRN232_ASSI1
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
+            builder.Services.AddScoped<INewArticleService, NewArticleService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddAutoMapper(typeof(MappingProfile)); // Add your profile here
+
             //builder.Services.AddScoped<SystemAccountService>();
     
 
