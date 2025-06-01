@@ -1,3 +1,4 @@
+@model List<Common.Dto.ListNewArticleRes>
 @{
     ViewData["Title"] = "Post Statistics";
 }
@@ -60,6 +61,53 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h2 class="card-title mb-4">📰 News Articles</h2>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Headline</th>
+                            <th>Content</th>
+                            <th>Source</th>
+                            <th>Category</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.NewsTitle)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Headline)</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.NewsContent))
+                                        {
+                                            @(item.NewsContent.Length > 100 ? item.NewsContent.Substring(0, 100) + "..." : item.NewsContent)
+                                        }
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.NewsSource)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
+                                    <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">No news articles found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

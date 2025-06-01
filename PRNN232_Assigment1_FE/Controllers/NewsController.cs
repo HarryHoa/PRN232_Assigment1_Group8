@@ -32,21 +32,26 @@ namespace PRNN232_Assigment1_FE.Controllers
                 PropertyNameCaseInsensitive = true
             });
 
+            ViewBag.StartDate = from.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = to.ToString("yyyy-MM-dd");
             if (responseDto != null && responseDto.IsSuccess)
             {
                 var resultJson = responseDto.Result?.ToString();
-                var newsList = JsonSerializer.Deserialize<NewArticleRes>(resultJson ?? "[]");
-                ViewBag.TotalPosts = newsList.TotalPosts;
-                ViewBag.AveragePerDay = newsList.AveragePerDay;
-                ViewBag.PostsMonth = newsList.PostsMonth;
-                ViewBag.PostsToday = newsList.PostsToday;
-                
+                if (!string.IsNullOrEmpty(resultJson))
+                {
+                    var newsList = JsonSerializer.Deserialize<NewArticleRes>(resultJson);
+                    ViewBag.TotalPosts = newsList?.TotalPosts;
+                    ViewBag.AveragePerDay = newsList?.AveragePerDay;
+                    ViewBag.PostsMonth = newsList?.PostsMonth;
+                    ViewBag.PostsToday = newsList?.PostsToday;
+                    
+                    return View(newsList?.listArticle ?? new List<ListNewArticleRes>());
+
+                }
             }
-            
-            ViewBag.StartDate = from.ToString("yyyy-MM-dd");
-            ViewBag.EndDate = to.ToString("yyyy-MM-dd");
-            
+
             return View();
+
         }
     }
 } 
