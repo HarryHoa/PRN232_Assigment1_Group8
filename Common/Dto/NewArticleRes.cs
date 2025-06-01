@@ -1,11 +1,22 @@
+using System.Text.Json.Serialization;
+
 namespace Common.Dto;
 
 public class NewArticleRes
 {
-    public string NewsTitle { get; set; }
-    public string Headline { get; set; }
-    public string NewsContent { get; set; }
-    public string NewsSource { get; set; }
-    public string CategoryName { get; set; }    
-    public DateTime CreatedDate { get; set; }
+    [JsonPropertyName("totalPosts")]
+    public int TotalPosts { get; set; }
+
+    [JsonPropertyName("averagePerDay")]
+    public int AveragePerDay  { get; set; }
+
+    [JsonPropertyName("postsMonth")]
+    public int PostsMonth { get; set; }
+
+    [JsonPropertyName("postsToday")]
+    public int PostsToday { get; set; }
+
+    [JsonPropertyName("listArticle")]
+    public List<ListNewArticleRes> listArticle { get; set; }
+
 }

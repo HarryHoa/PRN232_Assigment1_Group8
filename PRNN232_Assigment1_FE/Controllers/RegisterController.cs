@@ -14,49 +14,61 @@ namespace PRNN232_Assigment1_FE.Controllers
             _httpClient = httpClient;
             _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
         }
+
         [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult>Index(SystemAccountModel accountModel)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(SystemAccountModel accountModel)
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Please fill in all required fields correctly.";
                 return View(accountModel);
             }
+
             try
             {
-                var accountData = new 
+                var accountData = new
                 {
-                    accountId = accountModel.AccountId,
-                    accountName = accountModel.AccountName,
-                    accountEmail = accountModel.AccountEmail,
-                    accountPassword = accountModel.AccountPassword,
-                    accountRole = accountModel.AccountRole,
-
-
+                    AccountId = accountModel.AccountId,
+                    AccountName = accountModel.AccountName,
+                    AccountEmail = accountModel.AccountEmail,
+                    AccountPassword = accountModel.AccountPassword,
+                    AccountRole = accountModel.AccountRole // Convert to int if needed
                 };
+
                 var jsonContent = JsonSerializer.Serialize(accountData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
                 var response = await _httpClient.PostAsync("SystemAccount/register", content);
-                if (response != null && response.IsSuccessStatusCode)
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("Login", "Index");
+                    ModelState.Clear();
+                    TempData["SuccessMessage"] = "Account created successfully!";
+                    return View(new SystemAccountModel());
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Registration failed, please try again.";
+                    // Log chi tiết lỗi
+                    System.Diagnostics.Debug.WriteLine($"API Error: {response.StatusCode}");
+                    System.Diagnostics.Debug.WriteLine($"Response: {responseContent}");
+
+                    TempData["ErrorMessage"] = $"Registration failed: {response.StatusCode}";
                     return View(accountModel);
                 }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred during registration: " + ex.Message;
+                System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                TempData["ErrorMessage"] = "Connection error. Please try again.";
+                return View(accountModel);
             }
-            return View(accountModel);
-
         }
     }
 }
