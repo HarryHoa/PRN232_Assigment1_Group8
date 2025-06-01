@@ -1,4 +1,7 @@
+using DAL.Models;
+using Microsoft.EntityFrameworkCore;
 using PRNN232_Assigment1_FE.Controllers;
+using System.Configuration;
 
 namespace PRNN232_Assigment1_FE
 {
@@ -18,6 +21,8 @@ namespace PRNN232_Assigment1_FE
             //});
 
             // Fix for CS1929: Use IHttpClientBuilder returned by AddHttpClient() to configure the primary HTTP message handler.
+            builder.Services.AddDbContext<FUNewsManagementContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddHttpClient<LoginController>(client =>
             {
