@@ -16,15 +16,36 @@ namespace PRNN232_Assigment1_FE.Controllers
             _client.BaseAddress = new Uri("https://localhost:7252/api/");
         }
 
-        public async Task<IActionResult> Index()
-        {
-            var res = await _client.GetAsync("AdminCrudAccount");
-            var json = await res.Content.ReadAsStringAsync();
-            var dto = JsonConvert.DeserializeObject<ResponseDto>(json);
-            var data = JsonConvert.DeserializeObject<List<AdminAccountViewModel>>(dto.Result.ToString());
+        public async Task<IActionResult> Index(string keyword)
+  {
+      ViewBag.Keyword = keyword;
 
-            return View(data);
-        }
+      HttpResponseMessage response;
+
+      if (!string.IsNullOrWhiteSpace(keyword))
+      {
+          response = await _client.GetAsync($"AdminCrudAccount/search?keyword={keyword}");
+      }
+      else
+      {
+          response = await _client.GetAsync("AdminCrudAccount");
+      }
+
+      if (!response.IsSuccessStatusCode)
+      {
+          TempData["Error"] = "Failed to fetch account list.";
+          return View(new List<AdminAccountViewModel>());
+      }
+
+      var apiResult = await response.Content.ReadFromJsonAsync<ResponseDto>();
+      var data = System.Text.Json.JsonSerializer.Serialize(apiResult.Result);
+      var accounts = System.Text.Json.JsonSerializer.Deserialize<List<AdminAccountViewModel>>(data, new JsonSerializerOptions
+      {
+          PropertyNameCaseInsensitive = true
+      });
+
+      return View(accounts);
+  }
 
         public IActionResult Create()
         {
