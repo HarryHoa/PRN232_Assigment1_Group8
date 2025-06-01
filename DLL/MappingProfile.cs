@@ -10,5 +10,9 @@ public class MappingProfile : Profile
     {
         CreateMap<NewsArticle, NewArticleRes>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
+
+        CreateMap<SystemAccount, AdminCRUDdto>().ReverseMap();
+
+
     }
 }

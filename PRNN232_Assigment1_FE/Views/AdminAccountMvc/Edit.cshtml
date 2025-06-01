@@ -1,0 +1,40 @@
+﻿namespace PRNN232_Assigment1_FE.Views.AdminAccount
+@model PRNN232_Assigment1_FE.Models.AdminAccountViewModel
+
+
+<h2>Edit Account</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="AccountId" />
+
+    <div class="form-group">
+        <label asp-for="AccountName"></label>
+        <input asp-for="AccountName" class="form-control" />
+        <span asp-validation-for="AccountName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AccountEmail"></label>
+        <input asp-for="AccountEmail" class="form-control" />
+        <span asp-validation-for="AccountEmail" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AccountPassword"></label>
+        <input asp-for="AccountPassword" class="form-control" />
+        <span asp-validation-for="AccountPassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AccountRole"></label>
+        <select asp-for="AccountRole" class="form-control">
+            <option value="">-- Select Role --</option>
+            <option value="1">Staff</option>
+            <option value="2">Member</option>
+        </select>
+        <span asp-validation-for="AccountRole" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

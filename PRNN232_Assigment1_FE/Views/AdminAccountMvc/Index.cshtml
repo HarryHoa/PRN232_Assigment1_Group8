@@ -1,0 +1,40 @@
+﻿namespace PRNN232_Assigment1_FE.Views.AdminAccountMvc
+@model List<AdminAccountViewModel>
+
+@{
+    ViewData["Title"] = "Account List";
+}
+
+<h2>Account List</h2>
+
+<!-- Nút Create ở trên bảng -->
+<a asp-action="Create" class="btn btn-primary mb-3">+ Create New Account</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var acc in Model)
+        {
+            <tr>
+                <td>@acc.AccountId</td>
+                <td>@acc.AccountName</td>
+                <td>@acc.AccountEmail</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@acc.AccountId" class="btn btn-warning btn-sm">Edit</a>
+
+                    <!-- Form Delete -->
+                    <form asp-action="Delete" asp-route-id="@acc.AccountId" method="post" style="display:inline;" onsubmit="return confirm('Are you sure to delete this account?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
