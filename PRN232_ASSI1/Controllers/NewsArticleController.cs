@@ -1,4 +1,3 @@
-﻿// Controllers/NewsArticleController.cs
 using Common.Dto;
 using DLL.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +23,8 @@ namespace PRN232_ASS11.Controllers
         /// Get all news articles with search and pagination
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<NewsArticleDto>>> GetNewsArticles([FromQuery] NewsArticleSearchDto searchDto)
+        public async Task<ActionResult<PagedResult<NewsArticleDto>>> GetNewsArticles(
+            [FromQuery] NewsArticleSearchDto searchDto)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace PRN232_ASS11.Controllers
                 }
 
                 var newsArticle = await _newsArticleService.GetNewsArticleByIdAsync(id);
-                
+
                 if (newsArticle == null)
                 {
                     return NotFound(new { message = "Can't find News Article" });
@@ -82,12 +82,12 @@ namespace PRN232_ASS11.Controllers
 
                 // Get current user ID (you'll need to implement this based on your authentication system)
                 var currentUserId = GetCurrentUserId();
-                
+
                 var newsArticleId = await _newsArticleService.CreateNewsArticleAsync(createDto, currentUserId);
-                
+
                 return CreatedAtAction(
-                    nameof(GetNewsArticle), 
-                    new { id = newsArticleId }, 
+                    nameof(GetNewsArticle),
+                    new { id = newsArticleId },
                     new { id = newsArticleId, message = "Success" });
             }
             catch (Exception ex)
@@ -123,9 +123,9 @@ namespace PRN232_ASS11.Controllers
 
                 // Get current user ID
                 var currentUserId = GetCurrentUserId();
-                
+
                 var success = await _newsArticleService.UpdateNewsArticleAsync(updateDto, currentUserId);
-                
+
                 if (!success)
                 {
                     return StatusCode(500, new { message = "Không thể cập nhật bài viết" });
@@ -160,7 +160,7 @@ namespace PRN232_ASS11.Controllers
                 }
 
                 var success = await _newsArticleService.DeleteNewsArticleAsync(id);
-                
+
                 if (!success)
                 {
                     return StatusCode(500, new { message = "Không thể xóa bài viết" });
@@ -210,7 +210,7 @@ namespace PRN232_ASS11.Controllers
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi tải thẻ" });
             }
         }
-        
+
         [HttpPost("bulk-delete")]
         public async Task<IActionResult> BulkDeleteNewsArticles([FromBody] List<string> ids)
         {
@@ -264,14 +264,22 @@ namespace PRN232_ASS11.Controllers
 
         private short GetCurrentUserId()
         {
-            
+
             var userIdClaim = User.FindFirst("UserId")?.Value;
             if (short.TryParse(userIdClaim, out short userId))
             {
                 return userId;
             }
-            
+
             throw new UnauthorizedAccessException("Không thể xác định người dùng hiện tại");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var response = await _newArticleService.GetNewsInDateRangeAsync(startDate, endDate);
+            if (!response.IsSuccess) return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
+            return Ok(response);
         }
     }
 }

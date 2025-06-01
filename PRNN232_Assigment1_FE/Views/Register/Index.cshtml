@@ -1,53 +1,115 @@
 ﻿@model PRNN232_Assigment1_FE.Models.SystemAccountModel
-
 @{
-    ViewData["Title"] = "SystemAccount";
+    ViewData["Title"] = "Register - SystemAccount";
 }
 
-<h1>SystemAccount</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Create New Account</h3>
+                </div>
+                <div class="card-body">
 
-<h4>SystemAccountModel</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="SystemAccount">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="AccountId" class="control-label"></label>
-                <input asp-for="AccountId" class="form-control" />
-                <span asp-validation-for="AccountId" class="text-danger"></span>
+                    <!-- Display Error Messages -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- Display Success Messages -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Success!</strong> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @using (Html.BeginForm("Index", "Register", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.AccountId, "Account ID", new { @class = "form-label" })
+                                @Html.EditorFor(model => model.AccountId, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Account ID", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.AccountId, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.AccountName, "Full Name", new { @class = "form-label" })
+                                @Html.EditorFor(model => model.AccountName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter Full Name", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.AccountName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            @Html.LabelFor(model => model.AccountEmail, "Email Address", new { @class = "form-label" })
+                            @Html.EditorFor(model => model.AccountEmail, new { htmlAttributes = new { @class = "form-control", @type = "email", @placeholder = "Enter Email Address", required = "required" } })
+                            @Html.ValidationMessageFor(model => model.AccountEmail, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.AccountPassword, "Password", new { @class = "form-label" })
+                                @Html.EditorFor(model => model.AccountPassword, new { htmlAttributes = new { @class = "form-control", @type = "password", @placeholder = "Enter Password", required = "required" } })
+                                @Html.ValidationMessageFor(model => model.AccountPassword, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.AccountRole, "Role", new { @class = "form-label" })
+                                @Html.DropDownListFor(model => model.AccountRole,
+                                         new SelectList(new[] {
+                            new { Value = "1", Text = "User" },
+                            new { Value = "2", Text = "Admin" }
+                            }, "Value", "Text"),
+                                         "Select Role",
+                                         new { @class = "form-select", required = "required" })
+                                @Html.ValidationMessageFor(model => model.AccountRole, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    @Html.ActionLink("Back to Home", "Index", "Home", null, new { @class = "btn btn-secondary" })
+                    @Html.ActionLink("Already have an account? Login", "Index", "Login", null, new { @class = "btn btn-link" })
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AccountName" class="control-label"></label>
-                <input asp-for="AccountName" class="form-control" />
-                <span asp-validation-for="AccountName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AccountEmail" class="control-label"></label>
-                <input asp-for="AccountEmail" class="form-control" />
-                <span asp-validation-for="AccountEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AccountRole" class="control-label"></label>
-                <input asp-for="AccountRole" class="form-control" />
-                <span asp-validation-for="AccountRole" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AccountPassword" class="control-label"></label>
-                <input asp-for="AccountPassword" class="form-control" />
-                <span asp-validation-for="AccountPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Bootstrap form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
 }

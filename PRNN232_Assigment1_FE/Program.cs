@@ -1,4 +1,7 @@
+﻿using DAL.Models;
+using Microsoft.EntityFrameworkCore;
 using PRNN232_Assigment1_FE.Controllers;
+using System.Configuration;
 
 namespace PRNN232_Assigment1_FE
 {
@@ -18,8 +21,13 @@ namespace PRNN232_Assigment1_FE
             //});
 
             // Fix for CS1929: Use IHttpClientBuilder returned by AddHttpClient() to configure the primary HTTP message handler.
+            builder.Services.AddDbContext<FUNewsManagementContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddHttpClient<LoginController>(client =>
+
+         
+
+            builder.Services.AddHttpClient<AdminAccountMvcController>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7252/api/");
                 client.Timeout = TimeSpan.FromSeconds(30);
@@ -30,7 +38,6 @@ namespace PRNN232_Assigment1_FE
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -43,7 +50,7 @@ namespace PRNN232_Assigment1_FE
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Login}/{action=Index}/{id?}");
+                pattern: "{controller=AdminAccountMvc}/{action=Index}/{id?}");
 
             app.Run();
         }

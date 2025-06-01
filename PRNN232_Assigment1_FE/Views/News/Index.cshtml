@@ -1,0 +1,128 @@
+@model List<Common.Dto.ListNewArticleRes>
+@{
+    ViewData["Title"] = "Post Statistics";
+}
+
+<div class="container p-4">
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <h1 class="display-4">📊 Post Statistics</h1>
+                <p class="lead text-muted">Track and analyze posts over time</p>
+            </div>
+
+            <div class="bg-white rounded p-4 mb-4 border shadow-sm">
+                <form method="get" action="/News" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">From date:</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate"
+                            value="@ViewBag.StartDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">To date:</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" value="@ViewBag.EndDate">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Update Statistics</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.TotalPosts</h3>
+                            <p class="text-muted mb-0">TOTAL POSTS</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.AveragePerDay</h3>
+                            <p class="text-muted mb-0">AVERAGE/DAY</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.PostsMonth</h3>
+                            <p class="text-muted mb-0">POSTS THIS MONTH</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h3 class="text-primary mb-3">@ViewBag.PostsToday</h3>
+                            <p class="text-muted mb-0">POSTS TODAY</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h2 class="card-title mb-4">📰 News Articles</h2>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Headline</th>
+                            <th>Content</th>
+                            <th>Source</th>
+                            <th>Category</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.NewsTitle)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Headline)</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.NewsContent))
+                                        {
+                                            @(item.NewsContent.Length > 100 ? item.NewsContent.Substring(0, 100) + "..." : item.NewsContent)
+                                        }
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.NewsSource)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
+                                    <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center">No news articles found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set minimum date for end date based on start date
+        document.getElementById('startDate').addEventListener('change', function () {
+            document.getElementById('endDate').min = this.value;
+        });
+
+        // Set maximum date for start date based on end date
+        document.getElementById('endDate').addEventListener('change', function () {
+            document.getElementById('startDate').max = this.value;
+        });
+    </script>
+}

@@ -2,7 +2,6 @@
 using Common.Validator;
 using DAL.Models;
 using DLL.Interface;
-using DLL.Mapping;
 using DLL.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -23,8 +22,15 @@ namespace PRN232_ASSI1
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
+            builder.Services.AddScoped<INewArticleService, NewArticleService>();
+            builder.Services.AddScoped<IAdminCrudAccountService, AdminCrudAccountService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddAutoMapper(typeof(MappingProfile)); // Add your profile here
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+
             //builder.Services.AddScoped<SystemAccountService>();
             builder.Services.AddScoped<INewsArticleService, NewsArticleService>();
+
 
             builder.Services.AddControllers()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SystemAccountDtoValidator>());
