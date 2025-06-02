@@ -21,16 +21,16 @@ namespace PRNN232_Assigment1_FE
                 options.Cookie.IsEssential = true;
             });
 
-        //    Fix for CS1929: Use IHttpClientBuilder returned by AddHttpClient() to configure the primary HTTP message handler.
-           builder.Services.AddDbContext<FUNewsManagementContext>(options =>
- options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-           builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                     .AddCookie(options =>
-                     {
-                         options.LoginPath = "/Login";
-                         options.AccessDeniedPath = "/Login/Forbidden";
-                     });
+            // Fix for CS1929: Use IHttpClientBuilder returned by AddHttpClient() to configure the primary HTTP message handler.
+            builder.Services.AddDbContext<FUNewsManagementContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+          
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                      .AddCookie(options =>
+                      {
+                          options.LoginPath = "/Login";
+                          options.AccessDeniedPath = "/Login/Forbidden";
+                      });
 
 
 
@@ -52,7 +52,7 @@ namespace PRNN232_Assigment1_FE
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseSession(); // Add this line before app.UseAuthorization();
+            //app.UseSession(); // Add this line before app.UseAuthorization();
             app.UseAuthentication();
 
             app.UseAuthorization();
