@@ -1,74 +1,122 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.Dto;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using PRNN232_Assigment1_FE.Models;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    public class LoginController : Controller
-    {
-        private readonly HttpClient _httpClient;
-
-        public LoginController(HttpClient httpClient)
+        public class LoginController : Controller
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
-        }
+            private readonly HttpClient _httpClient;
 
-        [HttpGet]
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Index(LoginModel model)
-        {
-            if (!ModelState.IsValid)
+            public LoginController(HttpClient httpClient)
             {
-                return View(model);
+                _httpClient = httpClient;
+                _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
             }
 
-            try
+            [HttpGet]
+            public IActionResult Index()
             {
-                var loginData = new
+                return View();
+            }
+            [HttpPost]
+            public async Task<IActionResult> Index(LoginModel model)
+            {
+                if (!ModelState.IsValid)
                 {
-                    email = model.Email,
-                    password = model.Password
-                };
-
-                var jsonContent = JsonSerializer.Serialize(loginData);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync("SystemAccount/login", content);
-
-                if (response != null && response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Mật khẩu hoặc Mail kh đúng hãy thử lại ";
-
                     return View(model);
                 }
+
+                try
+                {
+                    var loginData = new
+                    {
+                        email = model.Email,
+                        password = model.Password
+                    };
+
+                    var jsonContent = JsonSerializer.Serialize(loginData);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    var response = await _httpClient.PostAsync("SystemAccount/login", content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        TempData["ErrorMessage"] = "Mật khẩu hoặc Mail không đúng, hãy thử lại";
+                        return View(model);
+                    }
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonSerializer.Deserialize<SystemAccountDto>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (apiResponse == null)
+                    {
+                        TempData["ErrorMessage"] = "Login fail, please check your account";
+                        return View(model);
+                    }
+
+                    // Tạo claims để lưu thông tin user
+                    var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, apiResponse.AccountId.ToString()),
+                            new Claim(ClaimTypes.Name, apiResponse.AccountName ?? ""),
+                            new Claim(ClaimTypes.Email, apiResponse.AccountEmail ?? ""),
+                            new Claim(ClaimTypes.Role,apiResponse.AccountRole == 1 ? "Member" :apiResponse.AccountRole == 2 ? "Staff" :"Admin")
+
+                        };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    // Cấu hình authentication properties để đảm bảo cookie được lưu
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                    };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        principal,
+                        authProperties);
+                    Console.WriteLine(apiResponse);
+                    if (apiResponse.AccountRole == 3)
+                    {
+                        return RedirectToAction("Index", "AdminAccountMvc");
+                    }
+                    else // Staff hoặc role khác
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TempData["ErrorMessage"] = "Login fail, please check your account";
+                    return View(model);
+                }
+         
             }
-            catch (Exception ex)
+            public async Task<IActionResult> Logout()
             {
-                TempData["ErrorMessage"] = "Login fail, please check your account";
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                return View(model);
+                return RedirectToAction("Login", "Account");
             }
 
+            public async Task<IActionResult> Forbidden()
+            {
+                return View();
+            }
         }
-           
     }
+        
 
-    public class ResponseDto
-    {
-        public int StatusCode { get; set; }
-        public string Message { get; set; }
-        public bool IsSuccess { get; set; }
-        public object Result { get; set; }
-    }
-}
+  

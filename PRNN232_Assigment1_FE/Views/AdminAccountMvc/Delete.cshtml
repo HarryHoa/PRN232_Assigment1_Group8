@@ -1,16 +1,17 @@
 ﻿namespace PRNN232_Assigment1_FE.Views.AdminAccount
-@model PRNN232_Assigment1_FE.Models.AdminAccountViewModel
+@model AdminAccountViewModel
 
-@{
-    ViewData["Title"] = "Xác nhận xoá tài khoản";
-}
+<h2>Delete Account</h2>
 
-<h2>@ViewData["Title"]</h2>
-
-<h4>Bạn có chắc chắn muốn xoá tài khoản <strong>@Model.AccountName</strong> không?</h4>
+<h3>Are you sure you want to delete this account?</h3>
+<div>
+    <p><strong>ID:</strong> @Model.AccountId</p>
+    <p><strong>Name:</strong> @Model.AccountName</p>
+    <p><strong>Email:</strong> @Model.AccountEmail</p>
+</div>
 
 <form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="AccountId " />
-    <button type="submit" class="btn btn-danger">Xoá</button>
-    <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+    <input type="hidden" asp-for="AccountId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
