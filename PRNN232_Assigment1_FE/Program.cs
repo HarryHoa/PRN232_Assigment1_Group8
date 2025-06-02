@@ -52,7 +52,7 @@ namespace PRNN232_Assigment1_FE
             app.UseStaticFiles();
 
             app.UseRouting();
-            //app.UseSession(); // Add this line before app.UseAuthorization();
+            app.UseSession(); 
             app.UseAuthentication();
 
             app.UseAuthorization();

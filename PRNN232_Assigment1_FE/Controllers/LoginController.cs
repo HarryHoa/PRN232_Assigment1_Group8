@@ -69,7 +69,8 @@ namespace PRNN232_Assigment1_FE.Controllers
                         new Claim(ClaimTypes.NameIdentifier, apiResponse.AccountId.ToString()),
                         new Claim(ClaimTypes.Name, apiResponse.AccountName ?? ""),
                         new Claim(ClaimTypes.Email, apiResponse.AccountEmail ?? ""),
-                        new Claim(ClaimTypes.Role, apiResponse.AccountRole == 2 ? "Admin" : "Staff")
+                        new Claim(ClaimTypes.Role, apiResponse.AccountRole == 1 ? "Staff" : apiResponse.AccountRole == 2 ? "Lecturer" : "Admin")
+
                     };
 
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -87,9 +88,9 @@ namespace PRNN232_Assigment1_FE.Controllers
                     principal,
                     authProperties);
                 Console.WriteLine(apiResponse);
-                if (apiResponse.AccountRole == 2) // Admin
+                if (apiResponse.AccountRole == 3) 
                 {
-                    return RedirectToAction("Index", "Categories");
+                    return RedirectToAction("Index", "AdminAccountMvc");
                 }
                 else // Staff hoặc role khác
                 {
