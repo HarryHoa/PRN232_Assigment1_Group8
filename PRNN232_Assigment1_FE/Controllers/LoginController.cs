@@ -52,16 +52,17 @@ namespace PRNN232_Assigment1_FE.Controllers
                 }
 
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var apiResponse = JsonSerializer.Deserialize<SystemAccountDto>(responseContent, new JsonSerializerOptions
+                var apiWrapper = JsonSerializer.Deserialize<ApiResponse<SystemAccountDto>>(responseContent, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
-
-                if (apiResponse == null)
+                if (apiWrapper?.Result == null)
                 {
                     TempData["ErrorMessage"] = "Login fail, please check your account";
                     return View(model);
                 }
+                var apiResponse = apiWrapper.Result;
+                
 
                 // Tạo claims để lưu thông tin user
                 var claims = new List<Claim>
