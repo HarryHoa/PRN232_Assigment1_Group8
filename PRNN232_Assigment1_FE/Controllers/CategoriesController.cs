@@ -11,9 +11,11 @@ using System.Text.Json;
 using Common.Dto.CategoryDTO;
 using System.Text;
 using System.Net.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
+    [Authorize(Roles =("Staff"))]
     public class CategoriesController : Controller
     {
         private readonly FUNewsManagementContext _context;
