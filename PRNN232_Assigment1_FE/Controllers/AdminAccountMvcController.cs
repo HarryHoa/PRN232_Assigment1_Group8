@@ -78,15 +78,49 @@ namespace PRNN232_Assigment1_FE.Controllers
                 return View(vm);
             }
 
+            TempData["Success"] = "Account created successfully!";
+            return RedirectToAction("Index");
+
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(short id)
+        {
+            var response = await _client.GetAsync($"AdminCrudAccount/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to fetch account for deletion.";
+                return RedirectToAction("Index");
+            }
+
+            var dto = JsonConvert.DeserializeObject<ResponseDto>(await response.Content.ReadAsStringAsync());
+            var account = JsonConvert.DeserializeObject<AdminAccountViewModel>(dto.Result.ToString());
+
+            return View(account); // => Trả về Delete.cshtml
+        }
+
+
+
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed(short accountId)
+        {
+            var response = await _client.DeleteAsync($"AdminCrudAccount/{accountId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to delete account.";
+            }
+            else
+            {
+                TempData["Success"] = "Account deleted successfully!";
+            }
+
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(short id)
-        {
-            await _client.DeleteAsync($"AdminCrudAccount/{id}");
-            return RedirectToAction("Index");
-        }
 
         public async Task<IActionResult> Edit(short id)
         {
@@ -112,7 +146,9 @@ namespace PRNN232_Assigment1_FE.Controllers
             };
 
             await _client.PutAsJsonAsync($"AdminCrudAccount/{vm.AccountId}", dto);
+            TempData["Success"] = "Account updated successfully!";
             return RedirectToAction("Index");
+
         }
     }
 

@@ -12,6 +12,7 @@ namespace PRNN232_Assigment1_FE.Models
 
         [Required]
         [EmailAddress]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@FUNewsManagement\.org$", ErrorMessage = "Email must be in the format *@FUNewsManagement.org")]
         public string AccountEmail { get; set; }
         [Required]
         public string? AccountPassword { get; set; }

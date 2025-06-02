@@ -10,15 +10,15 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    public class LoginController : Controller
-    {
-        private readonly HttpClient _httpClient;
-
-        public LoginController(HttpClient httpClient)
+        public class LoginController : Controller
         {
-            _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
-        }
+            private readonly HttpClient _httpClient;
+
+            public LoginController(HttpClient httpClient)
+            {
+                _httpClient = httpClient;
+                _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
+            }
 
         [HttpGet]
         public IActionResult Index()
@@ -33,13 +33,13 @@ namespace PRNN232_Assigment1_FE.Controllers
                 return View(model);
             }
 
-            try
-            {
-                var loginData = new
+                try
                 {
-                    email = model.Email,
-                    password = model.Password
-                };
+                    var loginData = new
+                    {
+                        email = model.Email,
+                        password = model.Password
+                    };
 
                 var jsonContent = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -70,7 +70,8 @@ namespace PRNN232_Assigment1_FE.Controllers
                         new Claim(ClaimTypes.NameIdentifier, apiResponse.AccountId.ToString()),
                         new Claim(ClaimTypes.Name, apiResponse.AccountName ?? ""),
                         new Claim(ClaimTypes.Email, apiResponse.AccountEmail ?? ""),
-                        new Claim(ClaimTypes.Role, apiResponse.AccountRole == 2 ? "Admin" : "Staff")
+                        new Claim(ClaimTypes.Role, apiResponse.AccountRole == 1 ? "Staff" : apiResponse.AccountRole == 2 ? "Lecturer" : "Admin")
+
                     };
 
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -88,9 +89,9 @@ namespace PRNN232_Assigment1_FE.Controllers
                     principal,
                     authProperties);
                 Console.WriteLine(apiResponse);
-                if (apiResponse.AccountRole == 2) // Admin
+                if (apiResponse.AccountRole == 3) 
                 {
-                    return RedirectToAction("Index", "Categories");
+                    return RedirectToAction("Index", "AdminAccountMvc");
                 }
                 else // Staff hoặc role khác
                 {
