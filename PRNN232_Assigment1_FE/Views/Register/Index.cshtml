@@ -65,7 +65,8 @@
                                 @Html.DropDownListFor(model => model.AccountRole,
                                          new SelectList(new[] {
                             new { Value = "1", Text = "Staff" },
-                            new { Value = "2", Text = "Lecturer" }
+                            new { Value = "2", Text = "Lecturer" },
+                            new{ Value = "3", Text = "Admin"}
                             }, "Value", "Text"),
                                          "Select Role",
                                          new { @class = "form-select", required = "required" })
