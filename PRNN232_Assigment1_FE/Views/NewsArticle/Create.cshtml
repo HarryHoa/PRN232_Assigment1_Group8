@@ -1,0 +1,83 @@
+﻿@model Common.Dto.NewsArticleCreateDto
+
+@{
+    ViewData["Title"] = "Create News Article";
+}
+
+<h1 class="text-primary mb-4">Create News Article</h1>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+<div class="card shadow-sm p-4 bg-light">
+    <form id="createForm">
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label fw-bold">Title</label>
+            <input asp-for="Title" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label fw-bold">Content</label>
+            <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CategoryId" class="form-label fw-bold">Category</label>
+            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                <option value="">-- Select --</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Tags</label>
+            <select class="form-select" id="tagsSelect" multiple name="TagIds">
+                @foreach (var tag in ViewBag.Tags as List<Common.Dto.TagDto>)
+                {
+                    <option value="@tag.TagId">@tag.TagName</option>
+                }
+            </select>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Create
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Back to List
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $('#createForm').submit(function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const selectedTags = $('#tagsSelect').val();
+
+            const data = {
+                title: $('#Title').val(),
+                content: $('#Content').val(),
+                categoryId: $('#CategoryId').val(),
+                tagIds: selectedTags
+            };
+
+            $.ajax({
+                url: '/api/NewsArticle',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    alert("Tạo bài viết thành công");
+                    window.location.href = '/NewsArticle/Index'; // redirect to list
+                },
+                error: function (xhr) {
+                    alert("Đã xảy ra lỗi khi tạo bài viết");
+                }
+            });
+        });
+    </script>
+}

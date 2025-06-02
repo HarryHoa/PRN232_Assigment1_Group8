@@ -24,4 +24,5 @@ public abstract class NewsArticleBaseDto
     public bool Status { get; set; } = true;
 
     public List<int> TagIds { get; set; } = new List<int>();
+    public List<TagDto> Tags { get; set; } = new List<TagDto>();
 }

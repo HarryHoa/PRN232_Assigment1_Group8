@@ -1,0 +1,228 @@
+﻿@model Common.Dto.PagedResult<Common.Dto.NewsArticleDto.NewsArticleDto>
+
+@{
+ViewData["Title"] = "News Articles List";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">News Articles List</h2>
+        <a asp-action="Create" class="btn btn-success">+ Tạo bài viết mới</a>
+    </div>
+
+    <!-- Search Form -->
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="searchTerm" value="@Context.Request.Query["searchTerm"]"
+                       class="form-control" placeholder="Tìm kiếm theo tiêu đề..." />
+            </div>
+            <div class="col-md-3">
+                <select name="categoryId" class="form-select">
+                    <option value="">-- Tất cả danh mục --</option>
+                    @* Categories will be populated from ViewBag *@
+                    @if (ViewBag.Categories != null)
+                    {
+                    @foreach (var category in (List<Common.Dto.NewsArticleDto.CategoryDto>)ViewBag.Categories)
+                    {
+                    <option value="@category.CategoryId"
+                            selected="@(Context.Request.Query["categoryId"] == category.CategoryId.ToString())">
+                        @category.CategoryName
+                    </option>
+                    }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="newsStatus" class="form-select">
+                    <option value="">-- Trạng thái --</option>
+                    <option value="true" selected="@(Context.Request.Query["newsStatus"] == "true")">Hoạt động</option>
+                    <option value="false" selected="@(Context.Request.Query["newsStatus"] == "false")">Không hoạt động</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="fromDate" value="@Context.Request.Query["fromDate"]"
+                       class="form-control" placeholder="Từ ngày" />
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-primary w-100" type="submit">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </div>
+        </div>
+    </form>
+
+    @if (Model?.Items != null && Model.Items.Any())
+    {
+    <!-- Articles Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>Tiêu đề</th>
+                <th>Danh mục</th>
+                <th>Tác giả</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Ngày cập nhật</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var article in Model.Items)
+            {
+            <tr>
+                <td>
+                    <div class="fw-bold">@article.Title</div>
+                    @if (!string.IsNullOrEmpty(article.Content))
+                    {
+                    <small class="text-muted">
+                        @(article.Content.Length > 100 ? article.Content.Substring(0, 100) + "..." : article.Content)
+                    </small>
+                    }
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(article.CategoryName))
+                    {
+                    <span class="badge bg-info">@article.CategoryName</span>
+                    }
+                </td>
+                <td>@article.CreatedByName</td>
+                <td>
+                    @if (article.Status == true)
+                    {
+                    <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                    <span class="badge bg-secondary">Không hoạt động</span>
+                    }
+                </td>
+                <td>
+                    @if (article.CreatedDate.HasValue)
+                    {
+                    @article.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                    }
+                </td>
+                <td>
+                    @if (article.ModifiedDate.HasValue)
+                    {
+                    @article.ModifiedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                    }
+                </td>
+                <td>
+                    <div class="btn-group-vertical" role="group">
+                        <a asp-action="Details" asp-route-id="@article.NewsArticleId"
+                           class="btn btn-sm btn-outline-info mb-1">
+                            <i class="fas fa-eye"></i> Chi tiết
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@article.NewsArticleId"
+                           class="btn btn-sm btn-outline-warning mb-1">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@article.NewsArticleId"
+                           class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Xóa
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Button -->
+            @if (Model.HasPreviousPage)
+            {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.Page - 1)"
+                   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+                   asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                   asp-route-newsStatus="@Context.Request.Query["newsStatus"]"
+                   asp-route-fromDate="@Context.Request.Query["fromDate"]">
+                    Trước
+                </a>
+            </li>
+            }
+
+            <!-- Page Numbers -->
+            @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+            {
+            <li class="page-item @(i == Model.Page ? "active" : "")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@i"
+                   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+                   asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                   asp-route-newsStatus="@Context.Request.Query["newsStatus"]"
+                   asp-route-fromDate="@Context.Request.Query["fromDate"]">
+                    @i
+                </a>
+            </li>
+            }
+
+            <!-- Next Button -->
+            @if (Model.HasNextPage)
+            {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.Page + 1)"
+                   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+                   asp-route-categoryId="@Context.Request.Query["categoryId"]"
+                   asp-route-newsStatus="@Context.Request.Query["newsStatus"]"
+                   asp-route-fromDate="@Context.Request.Query["fromDate"]">
+                    Sau
+                </a>
+            </li>
+            }
+        </ul>
+    </nav>
+    }
+
+    <!-- Results Info -->
+    <div class="mt-3">
+        <small class="text-muted">
+            Hiển thị @((Model.Page - 1) * Model.PageSize + 1) -
+            @(Math.Min(Model.Page * Model.PageSize, Model.TotalCount))
+            trong tổng số @Model.TotalCount bài viết
+        </small>
+    </div>
+    }
+    else
+    {
+    <div class="alert alert-warning">
+        <i class="fas fa-info-circle"></i> Không tìm thấy bài viết nào.
+    </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut('slow');
+    }, 5000);
+</script>
+}

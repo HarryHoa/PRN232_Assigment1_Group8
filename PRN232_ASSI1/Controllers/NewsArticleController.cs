@@ -209,58 +209,7 @@ namespace PRN232_ASS11.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while getting tags");
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi tải thẻ" });
-            }
-        }
-
-        [HttpPost("bulk-delete")]
-        public async Task<IActionResult> BulkDeleteNewsArticles([FromBody] List<string> ids)
-        {
-            try
-            {
-                if (ids == null || !ids.Any())
-                {
-                    return BadRequest(new { message = "Invalid ID" });
-                }
-
-                int deletedCount = 0;
-                var errors = new List<string>();
-
-                foreach (var id in ids)
-                {
-                    try
-                    {
-                        var success = await _newsArticleService.DeleteNewsArticleAsync(id);
-                        if (success)
-                        {
-                            deletedCount++;
-                        }
-                        else
-                        {
-                            errors.Add($"Cannot delete article with ID: {id}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error deleting news article with ID: {Id}", id);
-                        errors.Add($"Lỗi khi xóa bài viết ID: {id}");
-                    }
-                }
-
-                var response = new
-                {
-                    deletedCount,
-                    totalRequested = ids.Count,
-                    errors,
-                    message = $"Delete {deletedCount}/{ids.Count} successfully"
-                };
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred during bulk delete operation");
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi xóa hàng loạt" });
+                return StatusCode(500, new { message = "Error when get tags" });
             }
         }
 
@@ -273,9 +222,8 @@ namespace PRN232_ASS11.Controllers
                 return userId;
             }
 
-            throw new UnauthorizedAccessException("Không thể xác định người dùng hiện tại");
+            throw new UnauthorizedAccessException("can't get current user");
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
