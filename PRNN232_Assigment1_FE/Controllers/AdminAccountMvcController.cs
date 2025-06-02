@@ -1,4 +1,5 @@
 ﻿using Common.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PRNN232_Assigment1_FE.Models;
@@ -7,6 +8,7 @@ using System.Text.Json;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
+    [Authorize(Roles =("Admin"))]
     public class AdminAccountMvcController : Controller
     {
         private readonly HttpClient _client;

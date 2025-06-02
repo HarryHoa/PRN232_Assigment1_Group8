@@ -1,9 +1,12 @@
 using System.Text.Json;
 using Common.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
+    [Authorize(Roles = ("Admin"))]
+
     public class NewsController : Controller
     {
 
