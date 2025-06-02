@@ -23,7 +23,7 @@ namespace PRNN232_Assigment1_FE.Controllers
             var from = startDate ?? DateTime.Today.AddDays(-6);
             var to = endDate ?? DateTime.Today;
 
-            var requestUrl = $"NewsArticle?startDate={from:yyyy-MM-dd}&endDate={to:yyyy-MM-dd}";
+            var requestUrl = $"NewsArticle/statistics?startDate={from:yyyy-MM-dd}&endDate={to:yyyy-MM-dd}";
             Console.WriteLine("Calling API URL: " + _httpClient.BaseAddress + requestUrl);
 
             var response = await _httpClient.GetAsync(requestUrl);

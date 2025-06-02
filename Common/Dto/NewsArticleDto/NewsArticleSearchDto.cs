@@ -1,4 +1,4 @@
-﻿namespace Common.Dto;
+﻿namespace Common.Dto.NewsArticleDto;
 
 public class NewsArticleSearchDto
 {

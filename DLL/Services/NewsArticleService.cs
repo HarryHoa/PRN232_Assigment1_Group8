@@ -112,13 +112,13 @@ namespace DLL.Services
 
         public async Task<string> CreateNewsArticleAsync(NewsArticleCreateDto createDto, short createdById)
         {
-            var newsArticleId = Guid.NewGuid().ToString();
+            var newsArticleId = Guid.NewGuid().ToString("N")[..20];
             
             var newsArticle = _mapper.Map<NewsArticle>(createDto);
             newsArticle.NewsArticleId = newsArticleId;
             newsArticle.CreatedById = createdById;
             newsArticle.CreatedDate = DateTime.Now;
-
+            
             // Add tags if provided
             if (createDto.TagIds.Any())
             {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Common.Dto;
+namespace Common.Dto.NewsArticleDto;
 
 public abstract class NewsArticleBaseDto
 {

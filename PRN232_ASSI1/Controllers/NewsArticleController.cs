@@ -1,24 +1,26 @@
+using System.Security.Claims;
 using Common.Dto;
 using Common.Dto.NewsArticleDto;
 using DLL.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace PRN232_ASS11.Controllers
+namespace PRN232_ASSI1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Assuming authentication is required for staff
+    // [Authorize(Roles =("Staff"))] // Assuming authentication is required for staff
     public class NewsArticleController : ControllerBase
     {
         private readonly INewsArticleService _newsArticleService;
         private readonly INewArticleService _newArticleService;
         private readonly ILogger<NewsArticleController> _logger;
 
-        public NewsArticleController(INewsArticleService newsArticleService, ILogger<NewsArticleController> logger)
+        public NewsArticleController(INewsArticleService newsArticleService, ILogger<NewsArticleController> logger,INewArticleService newArticleService)
         {
             _newsArticleService = newsArticleService;
             _logger = logger;
+            _newArticleService = newArticleService;
         }
 
         /// <summary>
@@ -81,9 +83,8 @@ namespace PRN232_ASS11.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-
-                // Get current user ID (you'll need to implement this based on your authentication system)
-                var currentUserId = GetCurrentUserId();
+                
+                var currentUserId = createDto.CurrentUserId;
 
                 var newsArticleId = await _newsArticleService.CreateNewsArticleAsync(createDto, currentUserId);
 
@@ -124,7 +125,7 @@ namespace PRN232_ASS11.Controllers
                 }
 
                 // Get current user ID
-                var currentUserId = GetCurrentUserId();
+                var currentUserId = GetCurrentUserId(updateDto);
 
                 var success = await _newsArticleService.UpdateNewsArticleAsync(updateDto, currentUserId);
 
@@ -213,18 +214,11 @@ namespace PRN232_ASS11.Controllers
             }
         }
 
-        private short GetCurrentUserId()
+        private short GetCurrentUserId(NewsArticleUpdateDto updateDto)
         {
-
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (short.TryParse(userIdClaim, out short userId))
-            {
-                return userId;
-            }
-
-            throw new UnauthorizedAccessException("can't get current user");
+            return updateDto.CurrentUserId;
         }
-        [HttpGet]
+        [HttpGet("statistics")]
         public async Task<IActionResult> GetAll([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             var response = await _newArticleService.GetNewsInDateRangeAsync(startDate, endDate);

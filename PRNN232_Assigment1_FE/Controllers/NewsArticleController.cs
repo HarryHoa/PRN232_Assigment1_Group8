@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using Common.Dto;
 using Common.Dto.NewsArticleDto;
@@ -138,7 +139,7 @@ public class NewsArticlesController : Controller
     public async Task<IActionResult> Create()
     {
         await LoadCategoriesAndTagsForCreate();
-        return View();
+        return View(new NewsArticleCreateDto());
     }
 
     // POST: NewsArticles/Create
@@ -151,7 +152,13 @@ public class NewsArticlesController : Controller
             await LoadCategoriesAndTagsForCreate();
             return View(createDto);
         }
-
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        Console.WriteLine($"User.Identity.IsAuthenticated: {User.Identity.IsAuthenticated}");
+        Console.WriteLine($"UserIdClaim: {userIdClaim}");
+        if (short.TryParse(userIdClaim, out short currentUserId))
+        {
+            createDto.CurrentUserId = currentUserId; // Gán vào DTO
+        }
         try
         {
             var jsonContent = new StringContent(
@@ -246,7 +253,11 @@ public class NewsArticlesController : Controller
             await LoadCategoriesAndTagsForCreate();
             return View(updateDto);
         }
-
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (short.TryParse(userIdClaim, out short currentUserId))
+        {
+            updateDto.CurrentUserId = currentUserId; // Gán vào DTO
+        }
         try
         {
             var jsonContent = new StringContent(
@@ -357,26 +368,51 @@ public class NewsArticlesController : Controller
 
     private async Task LoadCategoriesAndTagsForCreate()
     {
-        await LoadCategoriesForViewBag();
-        
         try
         {
+            // Load Categories
+            var response = await _httpClient.GetAsync("/api/NewsArticle/categories");
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonData = await response.Content.ReadAsStringAsync();
+                var categories = JsonSerializer.Deserialize<List<CategoryDto>>(jsonData,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+                // Convert to SelectList
+                ViewBag.Categories = new SelectList(
+                    categories ?? new List<CategoryDto>(), 
+                    "CategoryId", 
+                    "CategoryName"
+                );
+            }
+            else
+            {
+                ViewBag.Categories = new SelectList(new List<CategoryDto>(), "CategoryId", "CategoryName");
+            }
+        
+            // Load Tags
             var tagsResponse = await _httpClient.GetAsync("/api/NewsArticle/tags");
             if (tagsResponse.IsSuccessStatusCode)
             {
                 var tagsJsonData = await tagsResponse.Content.ReadAsStringAsync();
                 var tags = JsonSerializer.Deserialize<List<TagDto>>(tagsJsonData,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                ViewBag.Tags = tags ?? new List<TagDto>();
+                ViewBag.Tags = tags?.Select(t => new SelectListItem
+                {
+                    Value = t.TagId.ToString(),
+                    Text = t.TagName
+                }).ToList() ?? new List<SelectListItem>();
             }
             else
             {
-                ViewBag.Tags = new List<TagDto>();
+                ViewBag.Tags = new List<SelectListItem>();
             }
         }
-        catch
+        catch (Exception ex)
         {
-            ViewBag.Tags = new List<TagDto>();
+            Console.WriteLine($"Error loading categories and tags: {ex.Message}");
+            ViewBag.Categories = new SelectList(new List<CategoryDto>(), "CategoryId", "CategoryName");
+            ViewBag.Tags = new List<SelectListItem>();
         }
     }
 }

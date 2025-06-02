@@ -1,0 +1,239 @@
+﻿@model Common.Dto.NewsArticleDto.NewsArticleDto
+
+@{
+ViewData["Title"] = "Details";
+}
+
+<h1 class="mb-4">Chi tiết bài viết</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Chi tiết bài viết tin tức</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3 fw-semibold">
+                ID bài viết
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.NewsArticleId)
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd class="col-sm-9">
+                <h6 class="fw-bold">@Html.DisplayFor(model => model.Title)</h6>
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.Headline)
+            </dt>
+            <dd class="col-sm-9">
+                <em>@Html.DisplayFor(model => model.Headline)</em>
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.Content)
+            </dt>
+            <dd class="col-sm-9">
+                <div class="content-text">
+                    @if (!string.IsNullOrEmpty(Model.Content))
+                    {
+                    @foreach (var paragraph in Model.Content.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                    <p>@paragraph</p>
+                    }
+                    }
+                </div>
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.Source)
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.Source))
+                {
+                <span class="badge bg-info">@Html.DisplayFor(model => model.Source)</span>
+                }
+                else
+                {
+                <span class="text-muted">Không có nguồn</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                Danh mục
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.CategoryName))
+                {
+                <span class="badge bg-primary text-wrap" style="white-space: normal; max-width: 100%;">@Model.CategoryName</span>
+                }
+                else
+                {
+                <span class="text-muted">Chưa phân loại</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.Status)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.Status == true)
+                {
+                <span class="badge bg-success">Đang hoạt động</span>
+                }
+                else
+                {
+                <span class="badge bg-secondary">Không hoạt động</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                Tags
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.Tags != null && Model.Tags.Any())
+                {
+                @foreach (var tag in Model.Tags)
+                {
+                <span class="badge bg-secondary me-1">#@tag.TagName</span>
+                }
+                }
+                else
+                {
+                <span class="text-muted">Không có tag</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.CreatedDate)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.CreatedDate.HasValue)
+                {
+                <span class="text-success">
+                        <i class="fas fa-calendar-plus"></i>
+                    @Model.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                    </span>
+                }
+                else
+                {
+                <span class="text-muted">Chưa xác định</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                @Html.DisplayNameFor(model => model.ModifiedDate)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.ModifiedDate.HasValue)
+                {
+                <span class="text-warning">
+                        <i class="fas fa-calendar-edit"></i>
+                    @Model.ModifiedDate.Value.ToString("dd/MM/yyyy HH:mm:ss")
+                    </span>
+                }
+                else
+                {
+                <span class="text-muted">Chưa cập nhật</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3 fw-semibold">
+                Tác giả
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.CreatedByName))
+                {
+                <span class="badge bg-dark">
+                        <i class="fas fa-user"></i>
+                    @Model.CreatedByName
+                    </span>
+                }
+                else
+                {
+                <span class="text-muted">Không xác định</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="mb-4">
+    <a asp-action="Edit" asp-route-id="@Model?.NewsArticleId" class="btn btn-warning me-2">
+        <i class="fas fa-edit"></i> Chỉnh sửa
+    </a>
+    <a asp-action="Delete" asp-route-id="@Model?.NewsArticleId" class="btn btn-danger me-2">
+        <i class="fas fa-trash"></i> Xóa
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+    </a>
+</div>
+
+<!-- Additional Information Card -->
+@if (Model.Tags != null && Model.Tags.Any())
+{
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">
+            <i class="fas fa-tags"></i>
+            Thông tin bổ sung
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Số lượng tags:</strong>
+                <span class="badge bg-info">@Model.Tags.Count</span>
+            </div>
+            <div class="col-md-6">
+                <strong>Độ dài nội dung:</strong>
+                <span class="badge bg-info">@(Model.Content?.Length ?? 0) ký tự</span>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+<script>
+    // Optional: Add some interactivity
+    $(document).ready(function() {
+        // Highlight content on hover
+        $('.content-text p').hover(
+            function() { $(this).addClass('bg-light'); },
+            function() { $(this).removeClass('bg-light'); }
+        );
+    });
+</script>
+}
+
+<style>
+    .content-text {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid #007bff;
+    }
+
+    .content-text p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .content-text p:last-child {
+        margin-bottom: 0;
+    }
+
+    dt {
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.875em;
+    }
+</style>
