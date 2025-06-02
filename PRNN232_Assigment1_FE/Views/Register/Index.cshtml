@@ -64,8 +64,8 @@
                                 @Html.LabelFor(model => model.AccountRole, "Role", new { @class = "form-label" })
                                 @Html.DropDownListFor(model => model.AccountRole,
                                          new SelectList(new[] {
-                            new { Value = "1", Text = "User" },
-                            new { Value = "2", Text = "Admin" }
+                            new { Value = "1", Text = "Staff" },
+                            new { Value = "2", Text = "Lecturer" }
                             }, "Value", "Text"),
                                          "Select Role",
                                          new { @class = "form-select", required = "required" })
