@@ -1,4 +1,5 @@
 using Common.Dto;
+using Common.Dto.NewsArticleDto;
 using DLL.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ namespace PRN232_ASS11.Controllers
     public class NewsArticleController : ControllerBase
     {
         private readonly INewsArticleService _newsArticleService;
+        private readonly INewArticleService _newArticleService;
         private readonly ILogger<NewsArticleController> _logger;
 
         public NewsArticleController(INewsArticleService newsArticleService, ILogger<NewsArticleController> logger)

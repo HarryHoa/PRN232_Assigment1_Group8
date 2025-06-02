@@ -1,6 +1,6 @@
 ﻿
 
-namespace Common.Dto;
+namespace Common.Dto.NewsArticleDto;
 public class NewsArticleDto : NewsArticleBaseDto
 {
     public string? NewsArticleId { get; set; }

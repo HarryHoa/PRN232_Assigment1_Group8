@@ -1,4 +1,5 @@
 ﻿using Common.Dto;
+using Common.Dto.NewsArticleDto;
 
 namespace DLL.Interface
 {

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Common.Dto;
+using Common.Dto.NewsArticleDto;
 using DAL.Models;
 
 namespace DLL.Mapping
