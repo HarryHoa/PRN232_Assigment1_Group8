@@ -50,7 +50,7 @@ namespace PRNN232_Assigment1_FE
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=AdminAccountMvc}/{action=Index}/{id?}");
+                pattern: "{controller=Login}/{action=Index}/{id?}");
 
             app.Run();
         }
