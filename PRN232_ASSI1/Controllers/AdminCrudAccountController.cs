@@ -19,7 +19,7 @@ namespace PRN232_ASSI1.Controllers
 
         // GET: odata/AdminCrudAccount
         [EnableQuery]
-        [HttpGet]
+        [HttpGet("/api/GetAccounts")]
         public async Task<IActionResult> Get()
         {
             var response = await _service.GetAllAsync();
@@ -29,9 +29,8 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result); // thường là danh sách IQueryable<AdminCRUDdto>
         }
-
-        // GET: odata/AdminCrudAccount(1)
-        [HttpGet("{id}")]
+       
+        [HttpGet("/api/GetAccountsById/{id}")]
         public async Task<IActionResult> GetById(short id)
         {
             var response = await _service.GetByIdAsync(id);
@@ -41,9 +40,8 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result);
         }
-
-        // POST: odata/AdminCrudAccount
-        [HttpPost]
+        [EnableQuery]
+        [HttpPost("/api/CreateAccounts")]
         public async Task<IActionResult> Create([FromBody] AdminCRUDdto dto)
         {
             var response = await _service.CreateAsync(dto);
@@ -54,8 +52,7 @@ namespace PRN232_ASSI1.Controllers
             return Ok(response.Result);
         }
 
-        // PUT: odata/AdminCrudAccount(1)
-        [HttpPut("{id}")]
+        [HttpPut("/api/UpdateAccounts/{id}")]
         public async Task<IActionResult> Update(short id, [FromBody] AdminCRUDdto dto)
         {
             var response = await _service.UpdateAsync(id, dto);
@@ -66,8 +63,7 @@ namespace PRN232_ASSI1.Controllers
             return Ok(response.Result);
         }
 
-        // DELETE: odata/AdminCrudAccount(1)
-        [HttpDelete("{id}")]
+        [HttpDelete("/api/DeleteAccounts/{id}")]
         public async Task<IActionResult> Delete(short id)
         {
             var response = await _service.DeleteAsync(id);
@@ -78,7 +74,6 @@ namespace PRN232_ASSI1.Controllers
             return Ok(response.Result);
         }
 
-        // GET: odata/AdminCrudAccount/search?keyword=nam
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)
         {

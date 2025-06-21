@@ -20,35 +20,36 @@ namespace PRNN232_Assigment1_FE.Controllers
         }
 
         public async Task<IActionResult> Index(string keyword)
-  {
-      ViewBag.Keyword = keyword;
+        {
+            ViewBag.Keyword = keyword;
 
-      HttpResponseMessage response;
+            HttpResponseMessage response;
 
-      if (!string.IsNullOrWhiteSpace(keyword))
-      {
-          response = await _client.GetAsync($"AdminCrudAccount/search?keyword={keyword}");
-      }
-      else
-      {
-          response = await _client.GetAsync("AdminCrudAccount");
-      }
+            var query = "odata/AdminCrudAccount?$count=true";
 
-      if (!response.IsSuccessStatusCode)
-      {
-          TempData["Error"] = "Failed to fetch account list.";
-          return View(new List<AdminAccountViewModel>());
-      }
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                // Giả sử lọc theo tên
+                query += $"&$filter=contains(tolower(AccountName),'{keyword.ToLower()}')";
+            }
 
-      var apiResult = await response.Content.ReadFromJsonAsync<ResponseDto>();
-      var data = System.Text.Json.JsonSerializer.Serialize(apiResult.Result);
-      var accounts = System.Text.Json.JsonSerializer.Deserialize<List<AdminAccountViewModel>>(data, new JsonSerializerOptions
-      {
-          PropertyNameCaseInsensitive = true
-      });
+            response = await _client.GetAsync(query);
 
-      return View(accounts);
-  }
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to fetch account list.";
+                return View(new List<AdminAccountViewModel>());
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var odataResult = JsonConvert.DeserializeObject<ODataResponse<List<AdminAccountViewModel>>>(json);
+
+            ViewBag.TotalCount = odataResult.Count;
+
+            return View(odataResult.Value);
+        }
+
 
         public IActionResult Create()
         {

@@ -1,4 +1,5 @@
 ﻿
+using Common.Dto;
 using Common.Validator;
 using DAL.Models;
 using DAL.Repository;
@@ -21,11 +22,23 @@ namespace PRN232_ASSI1
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Category>("Categories");
+            modelBuilder.EntitySet<AdminCRUDdto>("AdminCrudAccount");
 
             // Add services to the container.
+            builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+            })
+            .AddOData(
+             options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
+            "odata",
+            modelBuilder.GetEdmModel()));
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
@@ -47,22 +60,6 @@ namespace PRN232_ASSI1
 
             builder.Services.AddDbContext<FUNewsManagementContext>(options =>
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-            var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Category>("Categories");
-            modelBuilder.EntitySet<SystemAccount>("SystemAccounts");  // Đăng ký entity
-
-            builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-    })
-    .AddOData(
-    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
-        "odata",
-        modelBuilder.GetEdmModel()));
 
             var app = builder.Build();
 

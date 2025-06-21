@@ -5,6 +5,7 @@ namespace Common.Dto
     public class AdminCRUDdto
 
     {
+        [Key]
         public short? AccountId { get; set; } 
 
         [Required]
