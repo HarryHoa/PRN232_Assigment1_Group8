@@ -4,6 +4,10 @@ using DAL.Models;
 using DLL.Interface;
 using DLL.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.AspNetCore.OData;
+
 
 namespace PRN232_ASSI1.Controllers
 {
@@ -17,6 +21,12 @@ namespace PRN232_ASSI1.Controllers
         {
             _service = service;
         }
+        //[HttpGet]
+        //[EnableQuery]
+        //public IActionResult Get()
+        //{
+        //    return Ok(_service.GetQueryable());
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetAll()

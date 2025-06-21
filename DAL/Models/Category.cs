@@ -2,6 +2,7 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace DAL.Models;
 
@@ -16,10 +17,10 @@ public partial class Category
     public short? ParentCategoryId { get; set; }
 
     public bool? IsActive { get; set; }
-
+    [JsonIgnore]
     public virtual ICollection<Category> InverseParentCategory { get; set; } = new List<Category>();
-
+    [JsonIgnore]
     public virtual ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
-
+    [JsonIgnore]
     public virtual Category ParentCategory { get; set; }
 }

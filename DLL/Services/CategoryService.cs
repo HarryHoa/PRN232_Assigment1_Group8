@@ -143,5 +143,9 @@ namespace DLL.Services
                 .ToListAsync();
         }
 
+        public IQueryable<Category> GetQueryable()
+        {
+            return _context.Categories.AsQueryable();
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace DLL.Interface
 {
     public interface ICategoryService
     {
+        IQueryable<Category> GetQueryable();
         Task<List<CategoryResponseDto>> GetAllAsync();
         Task<CategoryResponseDto> GetByIdAsync(short id);
         Task<Category> AddAsync(CategoryCreateDto category);

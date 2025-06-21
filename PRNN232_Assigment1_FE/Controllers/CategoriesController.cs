@@ -26,48 +26,78 @@ namespace PRNN232_Assigment1_FE.Controllers
             _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
         }
 
-      //GET
-        public async Task<IActionResult> Index(string searchString)
+        ////GET
+        //  public async Task<IActionResult> Index(string searchString)
 
+        //  {
+        //      string apiUrl = "/api/Category";
+
+        //      if (!string.IsNullOrEmpty(searchString))
+        //      {
+        //          apiUrl += $"/search?keyword={Uri.EscapeDataString(searchString)}";
+        //      }
+
+        //      var response = await _httpClient.GetAsync(apiUrl);
+        //      //var response = await _httpClient.GetAsync("/api/Category"); // Gọi endpoint API lấy danh sách
+        //      Console.WriteLine($"Calling API URL: {apiUrl}");
+        //      var jsonData2 = await response.Content.ReadAsStringAsync();
+        //      var categories2 = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData2,
+        //          new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        //      Console.WriteLine($"Categories count after search: {categories2?.Count ?? 0}");
+
+
+
+        //      if (response.IsSuccessStatusCode)
+        //      {
+        //          var jsonData = await response.Content.ReadAsStringAsync();
+
+        //          // Giải mã JSON thành list category DTO
+        //          var categories = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData,
+        //              new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        //          return View(categories);
+        //      }
+        //      else
+        //      {
+        //          // Xử lý lỗi
+        //          TempData["Error"] = "Không thể lấy dữ liệu từ API.";
+        //          return View(new List<CategoryResponseDto>());
+        //      }
+        //  }
+
+        public async Task<IActionResult> Index(string searchString)
         {
-            string apiUrl = "/api/Category";
+            string apiUrl = "/odata/CategoryOData";
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                apiUrl += $"/search?keyword={Uri.EscapeDataString(searchString)}";
+                apiUrl += $"?$filter=contains(CategoryName,'{Uri.EscapeDataString(searchString)}')";
             }
 
             var response = await _httpClient.GetAsync(apiUrl);
-            //var response = await _httpClient.GetAsync("/api/Category"); // Gọi endpoint API lấy danh sách
-            Console.WriteLine($"Calling API URL: {apiUrl}");
-            var jsonData2 = await response.Content.ReadAsStringAsync();
-            var categories2 = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData2,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Console.WriteLine($"Categories count after search: {categories2?.Count ?? 0}");
-
-
-
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var jsonData = await response.Content.ReadAsStringAsync();
-
-                // Giải mã JSON thành list category DTO
-                var categories = JsonSerializer.Deserialize<List<CategoryResponseDto>>(jsonData,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                return View(categories);
-            }
-            else
-            {
-                // Xử lý lỗi
-                TempData["Error"] = "Không thể lấy dữ liệu từ API.";
+                TempData["Error"] = "Không thể lấy dữ liệu từ API OData.";
                 return View(new List<CategoryResponseDto>());
             }
+
+            var jsonData = await response.Content.ReadAsStringAsync();
+
+            var categories = JsonSerializer.Deserialize<List<CategoryResponseDto>>(
+                jsonData,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return View(categories ?? new List<CategoryResponseDto>());
         }
 
+
+
+
         // GET: Categories/Details/5
-       
+
         public async Task<IActionResult> Details(short? id)
         {
             if (id == null)
@@ -107,30 +137,6 @@ namespace PRNN232_Assigment1_FE.Controllers
             }
         }
 
-
-        //// GET: Categories/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption");
-        //    return View();
-        //}
-
-        //// POST: Categories/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        ////[HttpPost]
-        ////[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("CategoryId,CategoryName,CategoryDesciption,ParentCategoryId,IsActive")] Category category)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        _context.Add(category);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption", category.ParentCategoryId);
-        //    return View(category);
-        //}
         [HttpGet]
         public IActionResult Create()
         {
@@ -180,60 +186,7 @@ namespace PRNN232_Assigment1_FE.Controllers
 
 
 
-        //// GET: Categories/Edit/5
-        //public async Task<IActionResult> Edit(short? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var category = await _context.Categories.FindAsync(id);
-        //    if (category == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption", category.ParentCategoryId);
-        //    return View(category);
-        //}
-
-        //// POST: Categories/Edit/5
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(short id, [Bind("CategoryId,CategoryName,CategoryDesciption,ParentCategoryId,IsActive")] Category category)
-        //{
-        //    if (id != category.CategoryId)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            _context.Update(category);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!CategoryExists(category.CategoryId))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption", category.ParentCategoryId);
-        //    return View(category);
-        //}
-
-        // GET: Categories/Edit/5
+     
         public async Task<IActionResult> Edit(short? id)
         {
             if (id == null)
