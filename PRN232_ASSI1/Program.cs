@@ -1,4 +1,4 @@
-
+﻿
 using Common.Validator;
 using DAL.Models;
 using DAL.Repository;
@@ -9,7 +9,9 @@ using DLL.Mapping;
 using DLL.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 
 namespace PRN232_ASSI1
 {
@@ -43,7 +45,15 @@ namespace PRN232_ASSI1
             // Updated to use the recommended method for registering validators
 
             builder.Services.AddDbContext<FUNewsManagementContext>(options =>
-  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<Category>("Categories");  // Đăng ký entity
+
+            builder.Services.AddControllers().AddOData(opt =>
+                opt.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100)
+                .AddRouteComponents("odata", modelBuilder.GetEdmModel()));
 
             var app = builder.Build();
 
