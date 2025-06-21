@@ -12,6 +12,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.ModelBuilder;
+using System.Text.Json.Serialization;
 
 namespace PRN232_ASSI1
 {
@@ -49,11 +50,19 @@ namespace PRN232_ASSI1
 
 
             var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Category>("Categories");  // Đăng ký entity
+            modelBuilder.EntitySet<Category>("Categories");
+            modelBuilder.EntitySet<SystemAccount>("SystemAccounts");  // Đăng ký entity
 
-            builder.Services.AddControllers().AddOData(opt =>
-                opt.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100)
-                .AddRouteComponents("odata", modelBuilder.GetEdmModel()));
+            builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+    })
+    .AddOData(
+    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
+        "odata",
+        modelBuilder.GetEdmModel()));
 
             var app = builder.Build();
 
