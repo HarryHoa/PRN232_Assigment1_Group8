@@ -25,7 +25,8 @@ namespace PRN232_ASSI1
             var modelBuilder = new ODataConventionModelBuilder();
             modelBuilder.EntitySet<Category>("Categories");
             modelBuilder.EntitySet<AdminCRUDdto>("AdminCrudAccount");
-
+            modelBuilder.EntitySet<NewsArticle>("NewsArticleOdata"); 
+            
             // Add services to the container.
             builder.Services.AddControllers()
             .AddJsonOptions(options =>
