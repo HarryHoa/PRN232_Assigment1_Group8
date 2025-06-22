@@ -10,9 +10,11 @@ using DLL.Mapping;
 using DLL.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.ModelBuilder;
+using PRN232_ASSI1.MiddleWare;
 using System.Text.Json.Serialization;
 
 namespace PRN232_ASSI1
@@ -48,7 +50,6 @@ namespace PRN232_ASSI1
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddScoped<ICategoryService, CategoryService>();
-
             //builder.Services.AddScoped<SystemAccountService>();
             builder.Services.AddScoped<INewsArticleService, NewsArticleService>();
 
@@ -72,6 +73,7 @@ namespace PRN232_ASSI1
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
