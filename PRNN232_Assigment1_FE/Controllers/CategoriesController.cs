@@ -157,16 +157,16 @@ namespace PRNN232_Assigment1_FE.Controllers
                 ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", dto.ParentCategoryId);
                 return View(dto);
             }
-
+        
             try
             {
                 var jsonContent = new StringContent(
                     JsonSerializer.Serialize(dto),
                     Encoding.UTF8,
                     "application/json");
-
+        
                 var response = await _httpClient.PostAsync("Category", jsonContent);
-
+        
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction(nameof(Index));

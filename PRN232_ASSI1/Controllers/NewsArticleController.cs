@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using Common.Dto;
 using Common.Dto.NewsArticleDto;
+using DAL.Models;
 using DLL.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace PRN232_ASSI1.Controllers
 {
@@ -218,6 +220,7 @@ namespace PRN232_ASSI1.Controllers
         {
             return updateDto.CurrentUserId;
         }
+        
         [HttpGet("statistics")]
         public async Task<IActionResult> GetAll([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
@@ -225,5 +228,10 @@ namespace PRN232_ASSI1.Controllers
             if (!response.IsSuccess) return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
             return Ok(response);
         }
+        
+        
+        
+
+
     }
 }
