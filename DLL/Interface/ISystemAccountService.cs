@@ -10,6 +10,8 @@ namespace DLL.Interface
    public interface ISystemAccountService
     {
          Task<ResponseDto> Login(string userName, string password);
+        Task<ResponseDto> LoginJWT(string userName, string password);
         Task<ResponseDto> ResgisterUser(SystemAccountDto account);
+
     }
 }

@@ -28,6 +28,16 @@ namespace PRN232_ASSI1.Controllers
             }
             return BadRequest(response);
         }
+        [HttpPost("login_jwt")]
+        public async Task<IActionResult> LoginJWT([FromBody] LoginDto loginDto)
+        {
+            var response = await _systemAccountServices.LoginJWT(loginDto.Email, loginDto.Password);
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
+        }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] SystemAccountDto account)
         {

@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    [Authorize(Roles =("Staff"))]
+    [Authorize(Roles = ("1"))]
     public class CategoriesController : Controller
     {
         private readonly FUNewsManagementContext _context;

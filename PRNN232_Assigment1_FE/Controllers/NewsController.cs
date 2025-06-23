@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    [Authorize(Roles = ("Admin"))]
+    [Authorize(Roles = "3")] 
+
     public class NewsController : Controller
     {
         private readonly HttpClient _httpClient;

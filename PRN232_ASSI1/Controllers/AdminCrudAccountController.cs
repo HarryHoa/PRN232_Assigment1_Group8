@@ -1,5 +1,6 @@
 ﻿using Common.Dto;
 using DLL.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -18,6 +19,7 @@ namespace PRN232_ASSI1.Controllers
         }
 
         // GET: odata/AdminCrudAccount
+        [Authorize(Roles = "3")]
         [EnableQuery]
         [HttpGet("/api/GetAccounts")]
         public async Task<IActionResult> Get()
@@ -29,7 +31,8 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result); // thường là danh sách IQueryable<AdminCRUDdto>
         }
-       
+        [Authorize(Roles = "3")]
+
         [HttpGet("/api/GetAccountsById/{id}")]
         public async Task<IActionResult> GetById(short id)
         {
@@ -40,6 +43,8 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result);
         }
+        [Authorize(Roles = "3")]
+
         [EnableQuery]
         [HttpPost("/api/CreateAccounts")]
         public async Task<IActionResult> Create([FromBody] AdminCRUDdto dto)
@@ -51,6 +56,7 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result);
         }
+        [Authorize(Roles = "3")]
 
         [HttpPut("/api/UpdateAccounts/{id}")]
         public async Task<IActionResult> Update(short id, [FromBody] AdminCRUDdto dto)
@@ -62,6 +68,7 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result);
         }
+        [Authorize(Roles = "3")]
 
         [HttpDelete("/api/DeleteAccounts/{id}")]
         public async Task<IActionResult> Delete(short id)
@@ -73,6 +80,7 @@ namespace PRN232_ASSI1.Controllers
 
             return Ok(response.Result);
         }
+        [Authorize(Roles = "3")]
 
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)

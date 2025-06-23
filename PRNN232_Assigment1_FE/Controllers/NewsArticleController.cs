@@ -3,14 +3,17 @@ using System.Text;
 using System.Text.Json;
 using Common.Dto;
 using Common.Dto.NewsArticleDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace PRNN232_Assigment1_FE.Controllers;
+[Authorize(Roles = "1")]
 
 public class NewsArticlesController : Controller
 {
     private readonly HttpClient _httpClient;
+   
 
     public NewsArticlesController(HttpClient httpClient)
     {

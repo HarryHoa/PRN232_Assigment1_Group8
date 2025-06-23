@@ -8,7 +8,8 @@ using System.Text.Json;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    [Authorize(Roles =("Admin"))]
+    [Authorize(Roles = "3")] 
+
     public class AdminAccountMvcController : Controller
     {
         private readonly HttpClient _client;

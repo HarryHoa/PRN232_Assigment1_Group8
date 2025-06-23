@@ -32,9 +32,7 @@ namespace PRNN232_Assigment1_FE
                           options.AccessDeniedPath = "/Login/Forbidden";
                       });
 
-
-
-           builder.Services.AddHttpClient<LoginController>(client =>
+            builder.Services.AddHttpClient<LoginController>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7252/api/");
                 client.Timeout = TimeSpan.FromSeconds(30);
