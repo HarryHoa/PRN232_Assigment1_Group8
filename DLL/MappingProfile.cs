@@ -12,6 +12,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
 
         CreateMap<SystemAccount, AdminCRUDdto>().ReverseMap();
+        CreateMap<SystemAccount, AdminCRUDdto>().ReverseMap();
 
 
     }

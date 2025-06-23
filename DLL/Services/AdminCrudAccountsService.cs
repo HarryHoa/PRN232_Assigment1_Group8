@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Common.Dto;
 using DAL.Models;
 using DAL.Repository;
@@ -21,6 +22,27 @@ namespace DLL.Services
             _repo = repo;
             _mapper = mapper;
         }
+        public IQueryable<AdminCRUDdto> GetAllForOdata()
+        {
+            var query = _repo.GetAll(); 
+            return query.ProjectTo<AdminCRUDdto>(_mapper.ConfigurationProvider);
+        }
+
+
+        public async Task<ResponseDto> GetAllForOdataAsync()
+        {
+            try
+            {
+                var entities = await _repo.GetAllAsync(); // Giả định _repo là IGenericRepository<User>
+                var result = _mapper.Map<List<AdminCRUDdto>>(entities);
+                return new ResponseDto(200, "Success", true, result);
+            }
+            catch (Exception ex)
+            {
+                return new ResponseDto(500, $"Error: {ex.Message}", false, null);
+            }
+        }
+
 
         public async Task<ResponseDto> GetAllAsync()
         {

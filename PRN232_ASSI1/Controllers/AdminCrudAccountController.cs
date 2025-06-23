@@ -2,14 +2,12 @@
 using DLL.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace PRN232_ASSI1.Controllers
 {
     [ApiController]
-    [Route("odata/[controller]")]
-    public class AdminCrudAccountController : ODataController
+    [Route("api/[controller]")]
+    public class AdminCrudAccountController : ControllerBase
     {
         private readonly IAdminCrudAccountService _service;
 
@@ -18,69 +16,42 @@ namespace PRN232_ASSI1.Controllers
             _service = service;
         }
 
-        // GET: odata/AdminCrudAccount
-        [Authorize(Roles = "3")]
-        [EnableQuery]
-        [HttpGet("/api/GetAccounts")]
-        public async Task<IActionResult> Get()
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
             var response = await _service.GetAllAsync();
-
-            if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
-
-            return Ok(response.Result); // thường là danh sách IQueryable<AdminCRUDdto>
+            return StatusCode(response.StatusCode, response);
         }
-        [Authorize(Roles = "3")]
 
-        [HttpGet("/api/GetAccountsById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(short id)
         {
             var response = await _service.GetByIdAsync(id);
-
-            if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
-
-            return Ok(response.Result);
+            return StatusCode(response.StatusCode, response);
         }
-        [Authorize(Roles = "3")]
 
-        [EnableQuery]
-        [HttpPost("/api/CreateAccounts")]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] AdminCRUDdto dto)
         {
+
+
             var response = await _service.CreateAsync(dto);
-
-            if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
-
-            return Ok(response.Result);
+            return StatusCode(response.StatusCode, response);
         }
-        [Authorize(Roles = "3")]
 
-        [HttpPut("/api/UpdateAccounts/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(short id, [FromBody] AdminCRUDdto dto)
         {
             var response = await _service.UpdateAsync(id, dto);
-
-            if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
-
-            return Ok(response.Result);
+            return StatusCode(response.StatusCode, response);
         }
-        [Authorize(Roles = "3")]
 
-        [HttpDelete("/api/DeleteAccounts/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(short id)
         {
             var response = await _service.DeleteAsync(id);
-
-            if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
-
-            return Ok(response.Result);
+            return StatusCode(response.StatusCode, response);
         }
-        [Authorize(Roles = "3")]
 
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)
@@ -88,9 +59,11 @@ namespace PRN232_ASSI1.Controllers
             var response = await _service.SearchAsync(keyword);
 
             if (!response.IsSuccess)
-                return StatusCode((int)response.StatusCode, response.Message);
+            {
+                return StatusCode(response.StatusCode, response);
+            }
 
-            return Ok(response.Result);
+            return Ok(response);
         }
     }
 }

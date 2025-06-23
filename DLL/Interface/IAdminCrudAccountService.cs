@@ -10,6 +10,7 @@ namespace DLL.Interface
     
         public interface IAdminCrudAccountService
         {
+            IQueryable<AdminCRUDdto> GetAllForOdata();
             Task<ResponseDto> GetAllAsync();
             Task<ResponseDto> GetByIdAsync(short id);
             Task<ResponseDto> CreateAsync(AdminCRUDdto dto);

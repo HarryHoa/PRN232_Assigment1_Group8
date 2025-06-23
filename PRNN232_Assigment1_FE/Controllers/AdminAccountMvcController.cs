@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PRNN232_Assigment1_FE.Models;
-using System.Net.Http;
 using System.Text.Json;
 
 namespace PRNN232_Assigment1_FE.Controllers
 {
-    [Authorize(Roles = "3")] 
-
+    [Authorize(Roles = "3")]
     public class AdminAccountMvcController : Controller
     {
         private readonly HttpClient _client;
@@ -26,15 +24,14 @@ namespace PRNN232_Assigment1_FE.Controllers
 
             HttpResponseMessage response;
 
-            var query = "odata/AdminCrudAccount?$count=true";
-
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                // Giả sử lọc theo tên
-                query += $"&$filter=contains(tolower(AccountName),'{keyword.ToLower()}')";
+                response = await _client.GetAsync($"AdminCrudAccount/search?keyword={keyword}");
             }
-
-            response = await _client.GetAsync(query);
+            else
+            {
+                response = await _client.GetAsync("AdminCrudAccount");
+            }
 
             if (!response.IsSuccessStatusCode)
             {
@@ -42,15 +39,15 @@ namespace PRNN232_Assigment1_FE.Controllers
                 return View(new List<AdminAccountViewModel>());
             }
 
-            var json = await response.Content.ReadAsStringAsync();
+            var apiResult = await response.Content.ReadFromJsonAsync<ResponseDto>();
+            var data = System.Text.Json.JsonSerializer.Serialize(apiResult.Result);
+            var accounts = System.Text.Json.JsonSerializer.Deserialize<List<AdminAccountViewModel>>(data, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
-            var odataResult = JsonConvert.DeserializeObject<ODataResponse<List<AdminAccountViewModel>>>(json);
-
-            ViewBag.TotalCount = odataResult.Count;
-
-            return View(odataResult.Value);
+            return View(accounts);
         }
-
 
         public IActionResult Create()
         {

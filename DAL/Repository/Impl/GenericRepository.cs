@@ -32,7 +32,11 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
         return await query.ToListAsync();
     }
-    
+    public IQueryable<T> GetAllQueryable()
+    {
+        return _dbSet.AsQueryable();
+    }
+
     public async Task<IList<T>> GetAllAsync()
     {
         return await _context.Set<T>().ToListAsync();
@@ -84,4 +88,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         }
     }
 
+    public IQueryable<T> GetAll()
+    {
+        return _dbSet.AsQueryable();
+    }
 }

@@ -20,14 +20,7 @@ namespace PRNN232_Assigment1_FE.Models
         [Required]
         public int AccountRole { get; set; }
     }
-    public class ODataResponse<T>
-    {
-        [JsonProperty("@odata.count")]
-        public int Count { get; set; }
-
-        [JsonProperty("value")]
-        public T Value { get; set; }
-    }
+  
 
 
 
