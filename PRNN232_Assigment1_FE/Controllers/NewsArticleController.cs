@@ -20,6 +20,7 @@ public class NewsArticlesController : Controller
     }
 
     // GET: NewsArticles
+// GET: NewsArticles
 public async Task<IActionResult> Index(string searchTerm, short? categoryId, bool? newsStatus, 
                                      DateTime? fromDate, int page = 1, int pageSize = 10)
 {
@@ -82,25 +83,127 @@ public async Task<IActionResult> Index(string searchTerm, short? categoryId, boo
         if (response.IsSuccessStatusCode)
         {
             var jsonData = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"OData Response: {jsonData}"); // ✅ DEBUG: Log the response
+            Console.WriteLine($"OData Response: {jsonData}"); // DEBUG: Log the response
 
-            // ✅ FIX: Use the correct model for deserialization
-            var odataResult = JsonSerializer.Deserialize<NewsArticleODataResponse>(jsonData,
-                new JsonSerializerOptions { 
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+            List<NewsArticleODataItem> newsArticles = new List<NewsArticleODataItem>();
+            int totalCount = 0;
 
-            // ✅ FIX: Convert OData items to DTOs
-            var newsArticleDtos = odataResult?.Value?.Select(item => new NewsArticleDto
+            try
             {
-                NewsArticleId = item.NewsArticleId,
-                Title = item.NewsTitle,
-                Headline = item.Headline,
-                Content = item.NewsContent,
-                Source = item.NewsSource,
+                // ✅ FIX: Handle both array and object responses
+                using (JsonDocument document = JsonDocument.Parse(jsonData))
+                {
+                    var root = document.RootElement;
+                    
+                    if (root.ValueKind == JsonValueKind.Array)
+                    {
+                        // Case 1: Direct array response (no OData metadata)
+                        Console.WriteLine("Detected direct array response");
+                        
+                        newsArticles = JsonSerializer.Deserialize<List<NewsArticleODataItem>>(jsonData,
+                            new JsonSerializerOptions { 
+                                PropertyNameCaseInsensitive = true
+                            }) ?? new List<NewsArticleODataItem>();
+                        
+                        totalCount = newsArticles.Count;
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        // Case 2: OData response with metadata
+                        Console.WriteLine("Detected OData metadata response");
+                        
+                        if (root.TryGetProperty("value", out JsonElement valueElement))
+                        {
+                            var newsArticleJson = valueElement.GetRawText();
+                            newsArticles = JsonSerializer.Deserialize<List<NewsArticleODataItem>>(newsArticleJson,
+                                new JsonSerializerOptions { 
+                                    PropertyNameCaseInsensitive = true
+                                }) ?? new List<NewsArticleODataItem>();
+                        }
+                        
+                        if (root.TryGetProperty("@odata.count", out JsonElement countElement))
+                        {
+                            totalCount = countElement.GetInt32();
+                        }
+                        else
+                        {
+                            totalCount = newsArticles.Count;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unexpected JSON structure. Root type: {root.ValueKind}");
+                        throw new InvalidOperationException($"Unexpected JSON structure: {root.ValueKind}");
+                    }
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                Console.WriteLine($"JSON parsing error: {jsonEx.Message}");
+                
+                // Fallback: Try to parse as simple array of NewsArticle (your entity model)
+                try
+                {
+                    var fallbackArticles = JsonSerializer.Deserialize<List<DAL.Models.NewsArticle>>(jsonData,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    if (fallbackArticles != null)
+                    {
+                        // Convert from entity model to OData item model
+                        newsArticles = fallbackArticles.Select(entity => new NewsArticleODataItem
+                        {
+                            NewsArticleId = entity.NewsArticleId,
+                            NewsTitle = entity.NewsTitle,
+                            Headline = entity.Headline,
+                            NewsContent = entity.NewsContent,
+                            NewsSource = entity.NewsSource,
+                            CategoryId = entity.CategoryId,
+                            NewsStatus = entity.NewsStatus,
+                            CreatedDate = entity.CreatedDate,
+                            ModifiedDate = entity.ModifiedDate,
+                            CreatedById = entity.CreatedById,
+                            UpdatedById = entity.UpdatedById,
+                            Category = entity.Category != null ? new CategoryODataItem
+                            {
+                                CategoryId = entity.Category.CategoryId,
+                                CategoryName = entity.Category.CategoryName,
+                                CategoryDesciption = entity.Category.CategoryDesciption
+                            } : null,
+                            CreatedBy = entity.CreatedBy != null ? new SystemAccountODataItem
+                            {
+                                AccountId = entity.CreatedBy.AccountId,
+                                AccountName = entity.CreatedBy.AccountName,
+                                AccountEmail = entity.CreatedBy.AccountEmail
+                            } : null,
+                            Tags = entity.Tags?.Select(tag => new TagODataItem
+                            {
+                                TagId = tag.TagId,
+                                TagName = tag.TagName,
+                                Note = tag.Note
+                            }).ToList() ?? new List<TagODataItem>()
+                        }).ToList();
+                        
+                        totalCount = newsArticles.Count;
+                        Console.WriteLine($"Fallback parsing successful. Found {newsArticles.Count} articles");
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    Console.WriteLine($"Fallback parsing also failed: {fallbackEx.Message}");
+                    throw new InvalidOperationException($"Unable to parse JSON response: {jsonEx.Message}", jsonEx);
+                }
+            }
+
+            // Convert OData items to DTOs
+            var newsArticleDtos = newsArticles.Select(item => new NewsArticleDto
+            {
+                NewsArticleId = item.NewsArticleId ?? "",
+                Title = item.NewsTitle ?? "",
+                Headline = item.Headline ?? "",
+                Content = item.NewsContent ?? "",
+                Source = item.NewsSource ?? "",
                 CategoryId = item.CategoryId ?? 0,
-                CategoryName = item.Category?.CategoryDesciption ?? "",
+                CategoryName = item.Category?.CategoryDesciption ?? item.Category?.CategoryName ?? "",
                 Status = item.NewsStatus ?? false,
                 CreatedDate = item.CreatedDate,
                 ModifiedDate = item.ModifiedDate,
@@ -109,19 +212,21 @@ public async Task<IActionResult> Index(string searchTerm, short? categoryId, boo
                 Tags = item.Tags?.Select(t => new TagDto 
                 { 
                     TagId = t.TagId, 
-                    TagName = t.TagName, 
+                    TagName = t.TagName ?? "", 
                     Note = t.Note 
                 }).ToList() ?? new List<TagDto>()
-            }).ToList() ?? new List<NewsArticleDto>();
+            }).ToList();
 
             // Convert to PagedResult for existing view
             var pagedResult = new PagedResult<NewsArticleDto>
             {
                 Items = newsArticleDtos,
-                TotalCount = odataResult?.Count ?? 0,
+                TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
             };
+
+            Console.WriteLine($"Successfully parsed {newsArticleDtos.Count} articles with total count: {totalCount}");
 
             // Load categories for dropdown
             await LoadCategoriesForViewBag();
