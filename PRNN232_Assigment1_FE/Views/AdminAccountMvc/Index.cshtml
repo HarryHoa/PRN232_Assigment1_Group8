@@ -1,4 +1,5 @@
-﻿@model List<AdminAccountViewModel>
+﻿@model PaginatedListViewModel<AdminAccountViewModel>
+
 
 @{
     ViewData["Title"] = "Account List";
@@ -42,7 +43,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var acc in Model)
+        @foreach (var acc in Model.Items)
         {
             <tr>
                 <td>@acc.AccountId</td>
@@ -59,4 +60,26 @@
         </tr>
 
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4" class="text-center">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="?page=@(Model.CurrentPage - 1)&pageSize=@Model.PageSize&keyword=@Model.Keyword">Previous</a>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Page @Model.CurrentPage of @Model.TotalPages</span>
+                        </li>
+
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" href="?page=@(Model.CurrentPage + 1)&pageSize=@Model.PageSize&keyword=@Model.Keyword">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </td>
+        </tr>
+    </tfoot>
+
 </table>

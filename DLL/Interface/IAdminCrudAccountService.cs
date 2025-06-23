@@ -1,4 +1,5 @@
 ﻿using Common.Dto;
+using DAL.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace DLL.Interface
         public interface IAdminCrudAccountService
         {
             IQueryable<AdminCRUDdto> GetAllForOdata();
+            Task<BasePaginatedList<AdminCRUDdto>> GetPaginatedAccountsAsync(int pageIndex, int pageSize);
             Task<ResponseDto> GetAllAsync();
             Task<ResponseDto> GetByIdAsync(short id);
             Task<ResponseDto> CreateAsync(AdminCRUDdto dto);

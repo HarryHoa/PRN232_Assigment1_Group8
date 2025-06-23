@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Common.Dto;
+using DAL.Base;
 using DAL.Models;
 using DAL.Repository;
 using DLL.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -175,6 +177,18 @@ namespace DLL.Services
             }
         }
 
+        public async Task<BasePaginatedList<AdminCRUDdto>> GetPaginatedAccountsAsync(int pageIndex, int pageSize)
+        {
+            var query = GetAllForOdata(); // dùng lại cho tái sử dụng
+            return await GetPagging(query, pageIndex, pageSize);
+        }
 
+        private async Task<BasePaginatedList<AdminCRUDdto>> GetPagging(IQueryable<AdminCRUDdto> query, int index, int pageSize)
+        {
+            query = query.AsNoTracking();
+            int count = await query.CountAsync();
+            IReadOnlyCollection<AdminCRUDdto> items = await query.Skip((index - 1) * pageSize).Take(pageSize).ToListAsync();
+            return new BasePaginatedList<AdminCRUDdto>(items, count, index, pageSize);
+        }
     }
 }

@@ -16,6 +16,12 @@ namespace PRN232_ASSI1.Controllers
             _service = service;
         }
 
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedAccounts([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _service.GetPaginatedAccountsAsync(pageIndex, pageSize);
+            return Ok(result);
+        }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

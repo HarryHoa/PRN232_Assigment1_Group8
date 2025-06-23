@@ -18,36 +18,65 @@ namespace PRNN232_Assigment1_FE.Controllers
             _client.BaseAddress = new Uri("https://localhost:7252/api/");
         }
 
-        public async Task<IActionResult> Index(string keyword)
+        public async Task<IActionResult> Index(string keyword, int page = 1, int pageSize = 5)
         {
             ViewBag.Keyword = keyword;
 
-            HttpResponseMessage response;
-
+            var url = $"AdminCrudAccount/paged?pageIndex={page}&pageSize={pageSize}";
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                response = await _client.GetAsync($"AdminCrudAccount/search?keyword={keyword}");
+                url += $"&keyword={keyword}";
             }
-            else
-            {
-                response = await _client.GetAsync("AdminCrudAccount");
-            }
+
+            var response = await _client.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Failed to fetch account list.";
-                return View(new List<AdminAccountViewModel>());
+                TempData["Error"] = "Failed to fetch paged account list.";
+                return View(new PaginatedListViewModel<AdminAccountViewModel>
+                {
+                    Items = new List<AdminAccountViewModel>(),
+                    TotalItems = 0,
+                    CurrentPage = page,
+                    TotalPages = 0,
+                    PageSize = pageSize,
+                    Keyword = keyword
+                });
             }
 
-            var apiResult = await response.Content.ReadFromJsonAsync<ResponseDto>();
-            var data = System.Text.Json.JsonSerializer.Serialize(apiResult.Result);
-            var accounts = System.Text.Json.JsonSerializer.Deserialize<List<AdminAccountViewModel>>(data, new JsonSerializerOptions
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            var pagedResult = await System.Text.Json.JsonSerializer.DeserializeAsync<BasePaginatedListDto<AdminAccountViewModel>>(
+                stream,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            if (pagedResult == null)
             {
-                PropertyNameCaseInsensitive = true
+                TempData["Error"] = "Không thể đọc dữ liệu phân trang từ API.";
+                return View(new PaginatedListViewModel<AdminAccountViewModel>
+                {
+                    Items = new List<AdminAccountViewModel>(),
+                    TotalItems = 0,
+                    CurrentPage = page,
+                    TotalPages = 0,
+                    PageSize = pageSize,
+                    Keyword = keyword
+                });
+            }
+
+            return View(new PaginatedListViewModel<AdminAccountViewModel>
+            {
+                Items = pagedResult.Items.ToList(),
+                TotalItems = pagedResult.TotalItems,
+                CurrentPage = pagedResult.CurrentPage,
+                TotalPages = pagedResult.TotalPages,
+                PageSize = pagedResult.PageSize,
+                Keyword = keyword
             });
 
-            return View(accounts);
         }
+
 
         public IActionResult Create()
         {
