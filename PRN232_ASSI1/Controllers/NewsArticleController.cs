@@ -228,9 +228,48 @@ namespace PRN232_ASSI1.Controllers
             if (!response.IsSuccess) return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
             return Ok(response);
         }
+        [HttpGet("odata-query")]
+        public async Task<IActionResult> GetWithODataQuery(
+            [FromQuery] string? filter = null,
+            [FromQuery] string? orderby = null,
+            [FromQuery] int? top = null,
+            [FromQuery] int? skip = null,
+            [FromQuery] bool count = false)
+        {
+            try
+            {
+                var baseQuery = $"odata/NewsArticleOData";
+                var queryParams = new List<string>();
+
+                if (!string.IsNullOrEmpty(filter))
+                    queryParams.Add($"$filter={Uri.EscapeDataString(filter)}");
         
+                if (!string.IsNullOrEmpty(orderby))
+                    queryParams.Add($"$orderby={Uri.EscapeDataString(orderby)}");
         
+                if (top.HasValue)
+                    queryParams.Add($"$top={top.Value}");
         
+                if (skip.HasValue)
+                    queryParams.Add($"$skip={skip.Value}");
+        
+                if (count)
+                    queryParams.Add("$count=true");
+
+                var queryString = queryParams.Any() ? "?" + string.Join("&", queryParams) : "";
+                var fullQuery = baseQuery + queryString;
+
+                return Ok(new { 
+                    message = "Use this OData query", 
+                    odataUrl = fullQuery,
+                    example = "odata/NewsArticleOData?$filter=contains(NewsTitle,'news')&$orderby=CreatedDate desc&$top=10&$count=true"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error building OData query", error = ex.Message });
+            }
+        }
 
 
     }

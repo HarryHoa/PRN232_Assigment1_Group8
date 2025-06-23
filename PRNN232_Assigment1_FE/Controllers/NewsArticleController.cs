@@ -5,6 +5,7 @@ using Common.Dto;
 using Common.Dto.NewsArticleDto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PRNN232_Assigment1_FE.Models;
 
 namespace PRNN232_Assigment1_FE.Controllers;
 
@@ -19,76 +20,120 @@ public class NewsArticlesController : Controller
     }
 
     // GET: NewsArticles
-    public async Task<IActionResult> Index(string searchTerm, short? categoryId, bool? newsStatus, 
-                                         DateTime? fromDate, int page = 1, int pageSize = 10)
+public async Task<IActionResult> Index(string searchTerm, short? categoryId, bool? newsStatus, 
+                                     DateTime? fromDate, int page = 1, int pageSize = 10)
+{
+    try
     {
-        try
+        // Build OData query
+        var baseUrl = "/odata/NewsArticleOData";
+        var queryParams = new List<string>();
+
+        // Add $expand to include related data
+        queryParams.Add("$expand=Category,CreatedBy,Tags");
+        
+        // Add filters
+        var filters = new List<string>();
+        
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            // Tạo NewsArticleSearchDto object để gửi lên API
-            var searchDto = new NewsArticleSearchDto
+            filters.Add($"contains(tolower(NewsTitle),'{searchTerm.ToLower()}') or contains(tolower(NewsContent),'{searchTerm.ToLower()}')");
+        }
+        
+        if (categoryId.HasValue)
+        {
+            filters.Add($"CategoryId eq {categoryId.Value}");
+        }
+        
+        if (newsStatus.HasValue)
+        {
+            filters.Add($"NewsStatus eq {newsStatus.Value.ToString().ToLower()}");
+        }
+        
+        if (fromDate.HasValue)
+        {
+            var dateString = fromDate.Value.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            filters.Add($"CreatedDate ge {dateString}");
+        }
+
+        if (filters.Any())
+        {
+            queryParams.Add($"$filter={Uri.EscapeDataString(string.Join(" and ", filters))}");
+        }
+
+        // Add ordering
+        queryParams.Add("$orderby=CreatedDate desc");
+        
+        // Add pagination
+        queryParams.Add($"$top={pageSize}");
+        queryParams.Add($"$skip={(page - 1) * pageSize}");
+        
+        // Add count
+        queryParams.Add("$count=true");
+
+        string queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
+        string apiUrl = baseUrl + queryString;
+
+        Console.WriteLine($"Calling OData API URL: {apiUrl}");
+
+        // Call OData API
+        var response = await _httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"OData Response: {jsonData}"); // ✅ DEBUG: Log the response
+
+            // ✅ FIX: Use the correct model for deserialization
+            var odataResult = JsonSerializer.Deserialize<NewsArticleODataResponse>(jsonData,
+                new JsonSerializerOptions { 
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+            // ✅ FIX: Convert OData items to DTOs
+            var newsArticleDtos = odataResult?.Value?.Select(item => new NewsArticleDto
             {
-                SearchTerm = searchTerm,
-                CategoryId = categoryId,
-                NewsStatus = newsStatus,
-                FromDate = fromDate,
+                NewsArticleId = item.NewsArticleId,
+                Title = item.NewsTitle,
+                Headline = item.Headline,
+                Content = item.NewsContent,
+                Source = item.NewsSource,
+                CategoryId = item.CategoryId ?? 0,
+                CategoryName = item.Category?.CategoryDesciption ?? "",
+                Status = item.NewsStatus ?? false,
+                CreatedDate = item.CreatedDate,
+                ModifiedDate = item.ModifiedDate,
+                CreatedByName = item.CreatedBy?.AccountName ?? "",
+                TagIds = item.Tags?.Select(t => t.TagId).ToList() ?? new List<int>(),
+                Tags = item.Tags?.Select(t => new TagDto 
+                { 
+                    TagId = t.TagId, 
+                    TagName = t.TagName, 
+                    Note = t.Note 
+                }).ToList() ?? new List<TagDto>()
+            }).ToList() ?? new List<NewsArticleDto>();
+
+            // Convert to PagedResult for existing view
+            var pagedResult = new PagedResult<NewsArticleDto>
+            {
+                Items = newsArticleDtos,
+                TotalCount = odataResult?.Count ?? 0,
                 Page = page,
                 PageSize = pageSize
             };
 
-            // Tạo query string cho API
-            var queryParams = new List<string>();
-            
-            if (!string.IsNullOrEmpty(searchDto.SearchTerm))
-                queryParams.Add($"searchTerm={Uri.EscapeDataString(searchDto.SearchTerm)}");
-            
-            if (searchDto.CategoryId.HasValue)
-                queryParams.Add($"categoryId={searchDto.CategoryId.Value}");
-            
-            if (searchDto.NewsStatus.HasValue)
-                queryParams.Add($"newsStatus={searchDto.NewsStatus.Value}");
-            
-            if (searchDto.FromDate.HasValue)
-                queryParams.Add($"fromDate={searchDto.FromDate.Value:yyyy-MM-dd}");
-            
-            queryParams.Add($"page={searchDto.Page}");
-            queryParams.Add($"pageSize={searchDto.PageSize}");
+            // Load categories for dropdown
+            await LoadCategoriesForViewBag();
 
-            string queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
-            string apiUrl = $"/api/NewsArticle{queryString}";
-
-            Console.WriteLine($"Calling API URL: {apiUrl}");
-
-            // Gọi API để lấy danh sách bài viết
-            var response = await _httpClient.GetAsync(apiUrl);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonData = await response.Content.ReadAsStringAsync();
-                var pagedResult = JsonSerializer.Deserialize<PagedResult<NewsArticleDto>>(jsonData,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                // Lấy danh sách categories cho dropdown
-                await LoadCategoriesForViewBag();
-
-                return View(pagedResult);
-            }
-            else
-            {
-                TempData["Error"] = "Không thể lấy dữ liệu bài viết từ API.";
-                await LoadCategoriesForViewBag();
-                return View(new PagedResult<NewsArticleDto>
-                {
-                    Items = new List<NewsArticleDto>(),
-                    Page = 1,
-                    PageSize = pageSize,
-                    TotalCount = 0
-                });
-            }
+            return View(pagedResult);
         }
-        catch (Exception ex)
+        else
         {
-            TempData["Error"] = $"Lỗi khi gọi API: {ex.Message}";
-            Console.WriteLine($"Error calling NewsArticle API: {ex.Message}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"OData API Error: {response.StatusCode} - {errorContent}");
+            
+            TempData["Error"] = "Không thể lấy dữ liệu bài viết từ OData API.";
             await LoadCategoriesForViewBag();
             return View(new PagedResult<NewsArticleDto>
             {
@@ -99,6 +144,22 @@ public class NewsArticlesController : Controller
             });
         }
     }
+    catch (Exception ex)
+    {
+        TempData["Error"] = $"Lỗi khi gọi OData API: {ex.Message}";
+        Console.WriteLine($"Error calling OData API: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        
+        await LoadCategoriesForViewBag();
+        return View(new PagedResult<NewsArticleDto>
+        {
+            Items = new List<NewsArticleDto>(),
+            Page = 1,
+            PageSize = pageSize,
+            TotalCount = 0
+        });
+    }
+}
 
     // GET: NewsArticles/Details/5
     public async Task<IActionResult> Details(string id)
