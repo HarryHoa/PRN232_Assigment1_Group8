@@ -25,11 +25,7 @@ namespace Common.Validator
 
             RuleFor(x => x.AccountPassword)
                 .NotEmpty().WithMessage("Password is required");
-       
 
-            RuleFor(x => x.AccountRole)
-                .Must(role => role == null || new[] { 1, 2 }.Contains(role.Value))
-                .WithMessage("AccountRole must be either 1 (Admin) or 2 (Staff)");
         }
 
         private bool BeValidFunewsEmail(string email)

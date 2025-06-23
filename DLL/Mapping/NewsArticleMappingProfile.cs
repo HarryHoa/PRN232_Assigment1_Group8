@@ -15,9 +15,9 @@ namespace DLL.Mapping
                 .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.NewsContent))
                 .ForMember(dest => dest.Source, opt => opt.MapFrom(src => src.NewsSource))
                 .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryId ?? 0))
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryDesciption))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.CategoryDesciption : ""))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.NewsStatus ?? true))
-                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy.AccountName))
+                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? src.CreatedBy.AccountName : ""))
                 .ForMember(dest => dest.TagIds, opt => opt.MapFrom(src => src.Tags.Select(t => t.TagId).ToList()))
                 .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));
 

@@ -6,6 +6,7 @@ using Common.Dto.NewsArticleDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PRNN232_Assigment1_FE.Models;
 
 namespace PRNN232_Assigment1_FE.Controllers;
 [Authorize(Roles = "1")]
@@ -22,76 +23,225 @@ public class NewsArticlesController : Controller
     }
 
     // GET: NewsArticles
-    public async Task<IActionResult> Index(string searchTerm, short? categoryId, bool? newsStatus, 
-                                         DateTime? fromDate, int page = 1, int pageSize = 10)
+// GET: NewsArticles
+public async Task<IActionResult> Index(string searchTerm, short? categoryId, bool? newsStatus, 
+                                     DateTime? fromDate, int page = 1, int pageSize = 10)
+{
+    try
     {
-        try
+        // Build OData query
+        var baseUrl = "/odata/NewsArticleOData";
+        var queryParams = new List<string>();
+
+        // Add $expand to include related data
+        queryParams.Add("$expand=Category,CreatedBy,Tags");
+        
+        // Add filters
+        var filters = new List<string>();
+        
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            // Tạo NewsArticleSearchDto object để gửi lên API
-            var searchDto = new NewsArticleSearchDto
+            filters.Add($"contains(tolower(NewsTitle),'{searchTerm.ToLower()}') or contains(tolower(NewsContent),'{searchTerm.ToLower()}')");
+        }
+        
+        if (categoryId.HasValue)
+        {
+            filters.Add($"CategoryId eq {categoryId.Value}");
+        }
+        
+        if (newsStatus.HasValue)
+        {
+            filters.Add($"NewsStatus eq {newsStatus.Value.ToString().ToLower()}");
+        }
+        
+        if (fromDate.HasValue)
+        {
+            var dateString = fromDate.Value.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            filters.Add($"CreatedDate ge {dateString}");
+        }
+
+        if (filters.Any())
+        {
+            queryParams.Add($"$filter={Uri.EscapeDataString(string.Join(" and ", filters))}");
+        }
+
+        // Add ordering
+        queryParams.Add("$orderby=CreatedDate desc");
+        
+        // Add pagination
+        queryParams.Add($"$top={pageSize}");
+        queryParams.Add($"$skip={(page - 1) * pageSize}");
+        
+        // Add count
+        queryParams.Add("$count=true");
+
+        string queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
+        string apiUrl = baseUrl + queryString;
+
+        Console.WriteLine($"Calling OData API URL: {apiUrl}");
+
+        // Call OData API
+        var response = await _httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"OData Response: {jsonData}"); // DEBUG: Log the response
+
+            List<NewsArticleODataItem> newsArticles = new List<NewsArticleODataItem>();
+            int totalCount = 0;
+
+            try
             {
-                SearchTerm = searchTerm,
-                CategoryId = categoryId,
-                NewsStatus = newsStatus,
-                FromDate = fromDate,
+                // ✅ FIX: Handle both array and object responses
+                using (JsonDocument document = JsonDocument.Parse(jsonData))
+                {
+                    var root = document.RootElement;
+                    
+                    if (root.ValueKind == JsonValueKind.Array)
+                    {
+                        // Case 1: Direct array response (no OData metadata)
+                        Console.WriteLine("Detected direct array response");
+                        
+                        newsArticles = JsonSerializer.Deserialize<List<NewsArticleODataItem>>(jsonData,
+                            new JsonSerializerOptions { 
+                                PropertyNameCaseInsensitive = true
+                            }) ?? new List<NewsArticleODataItem>();
+                        
+                        totalCount = newsArticles.Count;
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        // Case 2: OData response with metadata
+                        Console.WriteLine("Detected OData metadata response");
+                        
+                        if (root.TryGetProperty("value", out JsonElement valueElement))
+                        {
+                            var newsArticleJson = valueElement.GetRawText();
+                            newsArticles = JsonSerializer.Deserialize<List<NewsArticleODataItem>>(newsArticleJson,
+                                new JsonSerializerOptions { 
+                                    PropertyNameCaseInsensitive = true
+                                }) ?? new List<NewsArticleODataItem>();
+                        }
+                        
+                        if (root.TryGetProperty("@odata.count", out JsonElement countElement))
+                        {
+                            totalCount = countElement.GetInt32();
+                        }
+                        else
+                        {
+                            totalCount = newsArticles.Count;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unexpected JSON structure. Root type: {root.ValueKind}");
+                        throw new InvalidOperationException($"Unexpected JSON structure: {root.ValueKind}");
+                    }
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                Console.WriteLine($"JSON parsing error: {jsonEx.Message}");
+                
+                // Fallback: Try to parse as simple array of NewsArticle (your entity model)
+                try
+                {
+                    var fallbackArticles = JsonSerializer.Deserialize<List<DAL.Models.NewsArticle>>(jsonData,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    if (fallbackArticles != null)
+                    {
+                        // Convert from entity model to OData item model
+                        newsArticles = fallbackArticles.Select(entity => new NewsArticleODataItem
+                        {
+                            NewsArticleId = entity.NewsArticleId,
+                            NewsTitle = entity.NewsTitle,
+                            Headline = entity.Headline,
+                            NewsContent = entity.NewsContent,
+                            NewsSource = entity.NewsSource,
+                            CategoryId = entity.CategoryId,
+                            NewsStatus = entity.NewsStatus,
+                            CreatedDate = entity.CreatedDate,
+                            ModifiedDate = entity.ModifiedDate,
+                            CreatedById = entity.CreatedById,
+                            UpdatedById = entity.UpdatedById,
+                            Category = entity.Category != null ? new CategoryODataItem
+                            {
+                                CategoryId = entity.Category.CategoryId,
+                                CategoryName = entity.Category.CategoryName,
+                                CategoryDesciption = entity.Category.CategoryDesciption
+                            } : null,
+                            CreatedBy = entity.CreatedBy != null ? new SystemAccountODataItem
+                            {
+                                AccountId = entity.CreatedBy.AccountId,
+                                AccountName = entity.CreatedBy.AccountName,
+                                AccountEmail = entity.CreatedBy.AccountEmail
+                            } : null,
+                            Tags = entity.Tags?.Select(tag => new TagODataItem
+                            {
+                                TagId = tag.TagId,
+                                TagName = tag.TagName,
+                                Note = tag.Note
+                            }).ToList() ?? new List<TagODataItem>()
+                        }).ToList();
+                        
+                        totalCount = newsArticles.Count;
+                        Console.WriteLine($"Fallback parsing successful. Found {newsArticles.Count} articles");
+                    }
+                }
+                catch (Exception fallbackEx)
+                {
+                    Console.WriteLine($"Fallback parsing also failed: {fallbackEx.Message}");
+                    throw new InvalidOperationException($"Unable to parse JSON response: {jsonEx.Message}", jsonEx);
+                }
+            }
+
+            // Convert OData items to DTOs
+            var newsArticleDtos = newsArticles.Select(item => new NewsArticleDto
+            {
+                NewsArticleId = item.NewsArticleId ?? "",
+                Title = item.NewsTitle ?? "",
+                Headline = item.Headline ?? "",
+                Content = item.NewsContent ?? "",
+                Source = item.NewsSource ?? "",
+                CategoryId = item.CategoryId ?? 0,
+                CategoryName = item.Category?.CategoryDesciption ?? item.Category?.CategoryName ?? "",
+                Status = item.NewsStatus ?? false,
+                CreatedDate = item.CreatedDate,
+                ModifiedDate = item.ModifiedDate,
+                CreatedByName = item.CreatedBy?.AccountName ?? "",
+                TagIds = item.Tags?.Select(t => t.TagId).ToList() ?? new List<int>(),
+                Tags = item.Tags?.Select(t => new TagDto 
+                { 
+                    TagId = t.TagId, 
+                    TagName = t.TagName ?? "", 
+                    Note = t.Note 
+                }).ToList() ?? new List<TagDto>()
+            }).ToList();
+
+            // Convert to PagedResult for existing view
+            var pagedResult = new PagedResult<NewsArticleDto>
+            {
+                Items = newsArticleDtos,
+                TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
             };
 
-            // Tạo query string cho API
-            var queryParams = new List<string>();
-            
-            if (!string.IsNullOrEmpty(searchDto.SearchTerm))
-                queryParams.Add($"searchTerm={Uri.EscapeDataString(searchDto.SearchTerm)}");
-            
-            if (searchDto.CategoryId.HasValue)
-                queryParams.Add($"categoryId={searchDto.CategoryId.Value}");
-            
-            if (searchDto.NewsStatus.HasValue)
-                queryParams.Add($"newsStatus={searchDto.NewsStatus.Value}");
-            
-            if (searchDto.FromDate.HasValue)
-                queryParams.Add($"fromDate={searchDto.FromDate.Value:yyyy-MM-dd}");
-            
-            queryParams.Add($"page={searchDto.Page}");
-            queryParams.Add($"pageSize={searchDto.PageSize}");
+            Console.WriteLine($"Successfully parsed {newsArticleDtos.Count} articles with total count: {totalCount}");
 
-            string queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
-            string apiUrl = $"/api/NewsArticle{queryString}";
+            // Load categories for dropdown
+            await LoadCategoriesForViewBag();
 
-            Console.WriteLine($"Calling API URL: {apiUrl}");
-
-            // Gọi API để lấy danh sách bài viết
-            var response = await _httpClient.GetAsync(apiUrl);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonData = await response.Content.ReadAsStringAsync();
-                var pagedResult = JsonSerializer.Deserialize<PagedResult<NewsArticleDto>>(jsonData,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                // Lấy danh sách categories cho dropdown
-                await LoadCategoriesForViewBag();
-
-                return View(pagedResult);
-            }
-            else
-            {
-                TempData["Error"] = "Không thể lấy dữ liệu bài viết từ API.";
-                await LoadCategoriesForViewBag();
-                return View(new PagedResult<NewsArticleDto>
-                {
-                    Items = new List<NewsArticleDto>(),
-                    Page = 1,
-                    PageSize = pageSize,
-                    TotalCount = 0
-                });
-            }
+            return View(pagedResult);
         }
-        catch (Exception ex)
+        else
         {
-            TempData["Error"] = $"Lỗi khi gọi API: {ex.Message}";
-            Console.WriteLine($"Error calling NewsArticle API: {ex.Message}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"OData API Error: {response.StatusCode} - {errorContent}");
+            
+            TempData["Error"] = "Không thể lấy dữ liệu bài viết từ OData API.";
             await LoadCategoriesForViewBag();
             return View(new PagedResult<NewsArticleDto>
             {
@@ -102,6 +252,22 @@ public class NewsArticlesController : Controller
             });
         }
     }
+    catch (Exception ex)
+    {
+        TempData["Error"] = $"Lỗi khi gọi OData API: {ex.Message}";
+        Console.WriteLine($"Error calling OData API: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        
+        await LoadCategoriesForViewBag();
+        return View(new PagedResult<NewsArticleDto>
+        {
+            Items = new List<NewsArticleDto>(),
+            Page = 1,
+            PageSize = pageSize,
+            TotalCount = 0
+        });
+    }
+}
 
     // GET: NewsArticles/Details/5
     public async Task<IActionResult> Details(string id)

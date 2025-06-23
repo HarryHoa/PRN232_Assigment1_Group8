@@ -17,7 +17,6 @@ namespace PRNN232_Assigment1_FE.Models
         public string AccountEmail { get; set; }
 
         [Required(ErrorMessage = "AccountRole is required.")]
-        [Range(1, 2, ErrorMessage = "AccountRole must be either 1 (Admin) or 2 (Staff).")]
         public int? AccountRole { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
