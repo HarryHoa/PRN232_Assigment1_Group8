@@ -1,4 +1,5 @@
 using DAL.Models;
+using DLL.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -10,10 +11,12 @@ namespace PRN232_ASSI1.Controllers
     public class NewsArticleODataController : ODataController
     {
         private readonly FUNewsManagementContext _context;
+        private readonly INewArticleService _newArticleService;
 
-        public NewsArticleODataController(FUNewsManagementContext context)
+        public NewsArticleODataController(FUNewsManagementContext context, INewArticleService newArticleService)
         {
             _context = context;
+            _newArticleService = newArticleService;
         }
 
         /// <summary>
@@ -50,6 +53,18 @@ namespace PRN232_ASSI1.Controllers
                 .Include(n => n.CreatedBy)
                 .Include(n => n.Tags)
                 .Where(n => n.NewsArticleId == key);
+        }
+        
+        
+        // [EnableQuery]
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetAll(ODataQueryOptions<NewsArticle> odataOptions)
+        {
+            var response = await _newArticleService.GetNewsByODataAsync(odataOptions);
+            if (!response.IsSuccess)
+                return StatusCode(StatusCodes.Status500InternalServerError, response.Message);
+        
+            return Ok(response);
         }
     }
 }
