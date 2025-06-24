@@ -3,9 +3,11 @@ using System.Text;
 using System.Text.Json;
 using Common.Dto;
 using Common.Dto.NewsArticleDto;
+using DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using PRNN232_Assigment1_FE.Models;
 
 namespace PRNN232_Assigment1_FE.Controllers;
@@ -14,12 +16,13 @@ namespace PRNN232_Assigment1_FE.Controllers;
 public class NewsArticlesController : Controller
 {
     private readonly HttpClient _httpClient;
-   
+    private readonly FUNewsManagementContext _context;
 
-    public NewsArticlesController(HttpClient httpClient)
+    public NewsArticlesController(HttpClient httpClient, FUNewsManagementContext context)
     {
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri("https://localhost:7252/api/");
+        _context = context;
     }
 
     // GET: NewsArticles
@@ -361,6 +364,10 @@ public async Task<IActionResult> Index(string searchTerm, short? categoryId, boo
     // GET: NewsArticles/Edit/5
     public async Task<IActionResult> Edit(string id)
     {
+        {
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
+            // return View();
+        }
         if (string.IsNullOrEmpty(id))
         {
             return NotFound();

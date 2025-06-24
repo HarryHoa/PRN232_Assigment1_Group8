@@ -48,7 +48,7 @@ ViewData["Title"] = "Edit NewsArticle";
             <div class="col-md-6">
                 <div class="mb-3">
                     <label asp-for="CategoryId" class="form-label fw-bold"></label>
-                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
                         <option value="">-- Select Category --</option>
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
